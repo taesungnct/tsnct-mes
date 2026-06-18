@@ -310,7 +310,34 @@ window.changePin=()=>{
 }
 
 function renderLogin(){
-  document.getElementById("root").innerHTML=`<div class="login-wrap"><div class="login-card">${lStep==="select"?renderLSel():lStep==="pin"?renderLPin():renderLAdmin()}</div></div>`;}
+  document.getElementById("root").innerHTML=`<div class="login-wrap"><div class="login-card" id="lc">${lStep==="select"?renderLSel():lStep==="pin"?renderLPin():renderLAdmin()}</div><div id="login-picker"></div></div>`;}
+
+function showLoginPicker(si){
+  const BC=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5DD8D8","#E8C86F"];
+  const BG=["rgba(30,42,80,0.8)","rgba(20,50,30,0.8)","rgba(60,20,20,0.8)","rgba(30,20,60,0.8)","rgba(60,40,10,0.8)","rgba(10,40,50,0.8)","rgba(40,40,10,0.8)"];
+  const bc=BC[si%BC.length];
+  const workers=wList().filter(w=>w.stepIdx===si);
+  const picker=document.getElementById("login-picker");
+  if(!picker)return;
+  picker.innerHTML=`<div style="position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;padding:1rem;z-index:200" onclick="this.remove()">
+    <div style="background:#1a1a1a;border-radius:14px;padding:1.35rem;width:100%;max-width:340px;border:1px solid ${bc}66" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <div style="font-size:1.1em;font-weight:400;color:${bc}">${STEPS[si]} 담당자</div>
+        <button style="background:transparent;border:1px solid #444;color:#f0f0f0;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:0.9em" onclick="document.getElementById('login-picker').innerHTML=''">✕</button>
+      </div>
+      ${workers.map(w=>{
+        const on=sessions[w.id]&&sessions[w.id].sessionId;
+        return`<div style="background:${BG[si%BG.length]};border:1px solid ${bc}44;border-radius:12px;padding:16px 18px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="document.getElementById('login-picker').innerHTML='';selWorker('${w.id}')">
+          <div>
+            <div style="font-size:1.2em;color:#f0f0f0">${w.name}</div>
+            ${on?`<div style="font-size:0.78em;color:#F5A800;margin-top:3px">현재 접속중</div>`:""}
+          </div>
+          <div style="font-size:0.85em;color:${bc}">→</div>
+        </div>`;
+      }).join("")}
+    </div>
+  </div>`;
+}
 
 function renderLSel(){
   const BG=["rgba(30,42,80,0.6)","rgba(20,50,30,0.6)","rgba(60,20,20,0.6)","rgba(30,20,60,0.6)","rgba(60,40,10,0.6)","rgba(10,40,50,0.6)","rgba(40,40,10,0.6)"];
@@ -332,38 +359,16 @@ function renderLSel(){
     const bc=BC[si%BC.length];
     const bg=BG[si%BG.length];
     const workers=wList().filter(w=>w.stepIdx===si);
-    return `<div class="user-row" style="background:${bg};border-color:${bc}44;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px" onclick="showWorkerPicker(${si})">
+    return `<div class="user-row" style="background:${bg};border-color:${bc}44;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px" onclick="showLoginPicker(${si})">
       <div style="flex:1">
         <div style="font-size:1.2em;color:#f0f0f0">${label}</div>
-        <div style="font-size:0.9em;color:${bc};margin-top:4px">${workers.map(w=>w.name).join(" · ")}</div>
+        <div style="font-size:0.9em;color:${bc};margin-top:4px">${workers.length}명</div>
       </div>
       <div style="width:44px;height:44px;color:${bc};opacity:0.5;flex-shrink:0">${STEP_ICONS[si]||""}</div>
     </div>`;
   }).join("")}`;
 }
 
-window.showWorkerPicker=(si)=>{
-  const BC=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5DD8D8","#E8C86F"];
-  const BG=["rgba(30,42,80,0.6)","rgba(20,50,30,0.6)","rgba(60,20,20,0.6)","rgba(30,20,60,0.6)","rgba(60,40,10,0.6)","rgba(10,40,50,0.6)","rgba(40,40,10,0.6)"];
-  const bc=BC[si%BC.length];
-  const workers=wList().filter(w=>w.stepIdx===si);
-  showOv(`<div class="modal" style="max-width:360px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <div class="mtitle" style="margin-bottom:0;color:${bc}">${STEPS[si]} 담당자</div>
-      <button class="btn" onclick="closeOv()" style="padding:5px 10px">✕</button>
-    </div>
-    ${workers.map(w=>{
-      const on=sessions[w.id]&&sessions[w.id].sessionId;
-      return `<div style="background:${BG[si%BG.length]};border:1px solid ${bc}44;border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="closeOv();setTimeout(()=>selWorker('${w.id}'),50)">
-        <div>
-          <div style="font-size:1.15em;color:#f0f0f0">${w.name}</div>
-          ${on?`<div style="font-size:0.75em;color:#F5A800;margin-top:3px">접속중</div>`:""}
-        </div>
-        <div style="font-size:0.82em;color:${bc}">PIN 입력 →</div>
-      </div>`;
-    }).join("")}
-  </div>`);
-}
 
 
 window.selAdmin=()=>{lStep="admin";renderLogin();}
