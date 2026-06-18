@@ -179,7 +179,20 @@ const db=getDatabase(app);
 const STEP_ICONS={"0": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"6\" y=\"8\" width=\"28\" height=\"36\" rx=\"2\" stroke=\"currentColor\" stroke-width=\"2.5\"/><line x1=\"12\" y1=\"18\" x2=\"28\" y2=\"18\" stroke=\"currentColor\" stroke-width=\"2\"/><line x1=\"12\" y1=\"24\" x2=\"28\" y2=\"24\" stroke=\"currentColor\" stroke-width=\"2\"/><line x1=\"12\" y1=\"30\" x2=\"22\" y2=\"30\" stroke=\"currentColor\" stroke-width=\"2\"/><circle cx=\"36\" cy=\"12\" r=\"6\" stroke=\"currentColor\" stroke-width=\"2\"/><line x1=\"34\" y1=\"12\" x2=\"38\" y2=\"12\" stroke=\"currentColor\" stroke-width=\"1.5\"/><line x1=\"36\" y1=\"10\" x2=\"36\" y2=\"14\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg>", "1": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"6\" y=\"32\" width=\"36\" height=\"6\" rx=\"1\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M24 8 L24 30\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"/><path d=\"M24 30 L16 38\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" opacity=\"0.5\"/><path d=\"M24 30 L32 38\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" opacity=\"0.5\"/><path d=\"M14 14 L24 8 L34 14\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><circle cx=\"24\" cy=\"30\" r=\"2.5\" fill=\"currentColor\" opacity=\"0.8\"/><path d=\"M18 20 L24 16 L30 20\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.5\"/></svg>", "2": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M6 34 L22 34 L36 14\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M36 14 L42 14\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\"/><path d=\"M6 38 L22 38 L38 16\" stroke=\"currentColor\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.3\"/><path d=\"M20 26 Q22 24 24 26\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><circle cx=\"22\" cy=\"34\" r=\"2.5\" fill=\"currentColor\" opacity=\"0.6\"/></svg>", "3": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M8 38 L40 38\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"/><path d=\"M8 32 L40 32\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"/><path d=\"M24 30 L24 14\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"/><path d=\"M24 14 L20 8\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" opacity=\"0.7\"/><path d=\"M24 14 L24 7\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" opacity=\"0.9\"/><path d=\"M24 14 L28 8\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" opacity=\"0.7\"/><path d=\"M20 16 L17 11\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" opacity=\"0.4\"/><path d=\"M28 16 L31 11\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" opacity=\"0.4\"/></svg>", "4": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M28 8 L36 16 L20 32 L10 34 L12 24 Z\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M24 12 L32 20\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" opacity=\"0.5\"/><path d=\"M36 16 L40 12 L38 10 L34 14\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.7\"/><circle cx=\"15\" cy=\"29\" r=\"2\" fill=\"currentColor\" opacity=\"0.5\"/></svg>", "5": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"6\" y=\"20\" width=\"20\" height=\"14\" rx=\"3\" stroke=\"currentColor\" stroke-width=\"2.5\"/><path d=\"M26 24 L34 24 L34 30 L26 30\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M34 27 L40 27\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"/><path d=\"M38 22 L42 20\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" opacity=\"0.5\"/><path d=\"M38 27 L43 27\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" opacity=\"0.5\"/><path d=\"M38 32 L42 34\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" opacity=\"0.5\"/><path d=\"M14 20 L14 16 Q14 12 18 12 L22 12\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg>", "6": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"6\" y=\"22\" width=\"22\" height=\"18\" rx=\"2\" stroke=\"currentColor\" stroke-width=\"2.5\"/><line x1=\"6\" y1=\"30\" x2=\"28\" y2=\"30\" stroke=\"currentColor\" stroke-width=\"1.5\" opacity=\"0.4\"/><path d=\"M14 22 L14 18 L20 18 L20 22\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M32 10 L42 18 L32 26\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M28 18 L42 18\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"/></svg>"};
 const STEPS=["도면작업","레이저","절곡","용접","후가공","도장/도금","출하"];
 const FREE_STEP=4;
-const DEF_USERS={admin:{id:"admin",pw:"admin1234",name:"관리자",role:"admin",stepIdx:-1},w0:{id:"w0",name:"김민준",role:"worker",pin:"1111",stepIdx:0},w1:{id:"w1",name:"이서연",role:"worker",pin:"2222",stepIdx:1},w2:{id:"w2",name:"박지호",role:"worker",pin:"3333",stepIdx:2},w3:{id:"w3",name:"최유나",role:"worker",pin:"4444",stepIdx:3},w4:{id:"w4",name:"정태양",role:"worker",pin:"5555",stepIdx:5},w5:{id:"w5",name:"한수진",role:"worker",pin:"6666",stepIdx:6}};
+const DEF_USERS={
+  admin:{id:"admin",pw:"admin1234",name:"관리자",role:"admin",stepIdx:-1},
+  w1:{id:"w1",name:"김오기",role:"worker",pin:"0000",stepIdx:0,canRegister:true},
+  w2:{id:"w2",name:"안성민",role:"worker",pin:"0000",stepIdx:0,canRegister:true},
+  w3:{id:"w3",name:"박은희",role:"worker",pin:"0000",stepIdx:0,canRegister:true},
+  w4:{id:"w4",name:"코로넬",role:"worker",pin:"0000",stepIdx:1},
+  w5:{id:"w5",name:"소안준",role:"worker",pin:"0000",stepIdx:2},
+  w6:{id:"w6",name:"푸성",role:"worker",pin:"0000",stepIdx:2},
+  w7:{id:"w7",name:"안동운",role:"worker",pin:"0000",stepIdx:3},
+  w8:{id:"w8",name:"라준식",role:"worker",pin:"0000",stepIdx:3},
+  w9:{id:"w9",name:"이태원",role:"worker",pin:"0000",stepIdx:3},
+  w10:{id:"w10",name:"표영만",role:"worker",pin:"0000",stepIdx:3},
+  w11:{id:"w11",name:"양주석",role:"worker",pin:"0000",stepIdx:5},
+};
 let users={},orders={},sessions={};
 let sess=null,tab="dash",fSt="all",sq="",lStep="select",lTarget=null,pinBuf="";
 let fontSize=localStorage.getItem("fontSize")||"medium";
@@ -193,6 +206,7 @@ function nextId(){const nums=Object.values(orders).map(o=>{const m=o.id&&o.id.ma
 function wList(){return Object.values(users).filter(u=>u.role==="worker");}
 function wNames(){return wList().map(u=>u.name);}
 const isAdmin=()=>sess&&sess.role==="admin";
+const canRegister=()=>isAdmin()||(sess&&sess.canRegister===true);
 const wIdx=()=>sess&&sess.role==="worker"?sess.stepIdx:-1;
 const wName=()=>sess?sess.name:"";
 function gSt(o){if(!o.steps)return"new";if(o.steps.every(s=>s===2))return"done";if(new Date(o.due)<new Date())return"delay";if(o.steps.findIndex(s=>s===1)===-1&&o.steps[0]===0)return"new";return"ongoing";}
@@ -221,6 +235,10 @@ function hdr(){
       <button class="ntab ${tab==="list"?"on":""}" onclick="sTab('list')">수주</button>
       <button class="ntab ${tab==="users"?"on":""}" onclick="sTab('users')">계정</button>
       <button class="ntab ${tab==="settings"?"on":""}" onclick="sTab('settings')">설정</button>
+    </div>`:canRegister()?`<div class="nav">
+      <button class="ntab ${tab==="dash"?"on":""}" onclick="sTab('dash')">내 공정</button>
+      <button class="ntab ${tab==="list"?"on":""}" onclick="sTab('list')">수주</button>
+      <button class="ntab ${tab==="settings"?"on":""}" onclick="sTab('settings')">설정</button>
     </div>`:`<div class="nav">
       <button class="ntab ${tab==="dash"?"on":""}" onclick="sTab('dash')">내 공정</button>
       <button class="ntab ${tab==="settings"?"on":""}" onclick="sTab('settings')">설정</button>
@@ -236,10 +254,11 @@ function render(){
   if(!sess){renderLogin();return;}
   document.getElementById("root").innerHTML=hdr()+`<div class="app"><div id="v-main"></div><div id="ov"></div></div>`;
   if(tab==="settings")renderSettings();
-  else if(!isAdmin())renderWorker();
-  else if(tab==="dash")renderDash();
-  else if(tab==="list")renderList();
-  else renderUsers();
+  else if(isAdmin()&&tab==="dash")renderDash();
+  else if(isAdmin()&&tab==="list")renderList();
+  else if(isAdmin()&&tab==="users")renderUsers();
+  else if(canRegister()&&tab==="list")renderList();
+  else renderWorker();
 }
 function sTab(t){tab=t;render();}
 function logout(){if(sess&&sess.role!=="admin")clearSession(sess.id);sess=null;lStep="select";lTarget=null;pinBuf="";render();}
@@ -294,51 +313,58 @@ function renderLogin(){
   document.getElementById("root").innerHTML=`<div class="login-wrap"><div class="login-card">${lStep==="select"?renderLSel():lStep==="pin"?renderLPin():renderLAdmin()}</div></div>`;}
 
 function renderLSel(){
-  return`<div style="display:flex;align-items:center;gap:14px;margin-bottom:1.35rem">
+  const BG=["rgba(30,42,80,0.6)","rgba(20,50,30,0.6)","rgba(60,20,20,0.6)","rgba(30,20,60,0.6)","rgba(60,40,10,0.6)","rgba(10,40,50,0.6)","rgba(40,40,10,0.6)"];
+  const BC=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5DD8D8","#E8C86F"];
+  const LOGIN_STEPS=[{si:0,label:"도면작업"},{si:1,label:"레이저"},{si:2,label:"절곡"},{si:3,label:"용접"},{si:5,label:"도장/도금"}];
+  return `<div style="display:flex;align-items:center;gap:14px;margin-bottom:1.35rem">
     <img class="login-logo" src="${LOGO}" alt="TS">
     <div><div class="login-title">태성NCT</div><div style="font-size:0.82em;color:#888;margin-top:2px;letter-spacing:0.05em">생산관리현황</div></div>
   </div>
-  <div class="login-sub">계정을 선택하세요</div>
-  <div class="user-row" onclick="selAdmin()">
+  <div class="login-sub">공정을 선택하세요</div>
+  <div class="user-row" onclick="selAdmin()" style="margin-bottom:8px">
     <div style="flex:1">
       <div style="font-size:1.2em;color:#f0f0f0">관리자</div>
       <div style="font-size:1em;color:#F5A800;margin-top:4px">ID / PW 로그인</div>
     </div>
   </div>
-  <div style="height:1px;background:#2a2a2a;margin:13px 0"></div>
-  ${(()=>{const BG=["rgba(30,42,80,0.6)","rgba(20,50,30,0.6)","rgba(60,20,20,0.6)","rgba(30,20,60,0.6)","rgba(60,40,10,0.6)","rgba(10,40,50,0.6)","rgba(40,40,10,0.6)"];const BC=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5DD8D8","#E8C86F"];return wList().filter(w=>w.stepIdx!==FREE_STEP).map((w,wi)=>{const on=sessions[w.id]&&sessions[w.id].sessionId;const bg=BG[w.stepIdx%BG.length];const bc=BC[w.stepIdx%BC.length];return`<div class="user-row ${on?"online":""}" style="background:${bg};border-color:${bc}44;display:flex;align-items:center;justify-content:space-between" onclick="selWorker('${w.id}')">
-    <div style="flex:1">
-      <div style="font-size:1.2em;color:#f0f0f0;display:flex;align-items:center;gap:8px">${w.name}${on?` <span style="font-size:0.65em;color:#F5A800;background:#3a2000;padding:2px 8px;border-radius:10px">접속중</span>`:""}</div>
-      <div style="font-size:1em;color:${bc};margin-top:4px">${STEPS[w.stepIdx]} 담당</div>
+  <div style="height:1px;background:#2a2a2a;margin:10px 0"></div>
+  ${LOGIN_STEPS.map(({si,label})=>{
+    const bc=BC[si%BC.length];
+    const bg=BG[si%BG.length];
+    const workers=wList().filter(w=>w.stepIdx===si);
+    return `<div class="user-row" style="background:${bg};border-color:${bc}44;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px" onclick="showWorkerPicker(${si})">
+      <div style="flex:1">
+        <div style="font-size:1.2em;color:#f0f0f0">${label}</div>
+        <div style="font-size:0.9em;color:${bc};margin-top:4px">${workers.map(w=>w.name).join(" · ")}</div>
+      </div>
+      <div style="width:44px;height:44px;color:${bc};opacity:0.5;flex-shrink:0">${STEP_ICONS[si]||""}</div>
+    </div>`;
+  }).join("")}`;
+}
+
+window.showWorkerPicker=(si)=>{
+  const BC=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5DD8D8","#E8C86F"];
+  const BG=["rgba(30,42,80,0.6)","rgba(20,50,30,0.6)","rgba(60,20,20,0.6)","rgba(30,20,60,0.6)","rgba(60,40,10,0.6)","rgba(10,40,50,0.6)","rgba(40,40,10,0.6)"];
+  const bc=BC[si%BC.length];
+  const workers=wList().filter(w=>w.stepIdx===si);
+  showOv(`<div class="modal" style="max-width:360px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <div class="mtitle" style="margin-bottom:0;color:${bc}">${STEPS[si]} 담당자</div>
+      <button class="btn" onclick="closeOv()" style="padding:5px 10px">✕</button>
     </div>
-    <div style="width:44px;height:44px;color:${bc};opacity:0.5;flex-shrink:0">${STEP_ICONS[w.stepIdx]||""}</div>
-  </div>`;}).join("");})()}`;}
+    ${workers.map(w=>{
+      const on=sessions[w.id]&&sessions[w.id].sessionId;
+      return `<div style="background:${BG[si%BG.length]};border:1px solid ${bc}44;border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="closeOv();setTimeout(()=>selWorker('${w.id}'),50)">
+        <div>
+          <div style="font-size:1.15em;color:#f0f0f0">${w.name}</div>
+          ${on?`<div style="font-size:0.75em;color:#F5A800;margin-top:3px">접속중</div>`:""}
+        </div>
+        <div style="font-size:0.82em;color:${bc}">PIN 입력 →</div>
+      </div>`;
+    }).join("")}
+  </div>`);
+}
 
-function renderLAdmin(){
-  return`<div style="cursor:pointer;margin-bottom:1.25rem;color:#888;font-size:0.9em;font-weight:400" onclick="back()">← 뒤로</div>
-  <div class="login-title" style="margin-bottom:5px">관리자 로그인</div>
-  <div class="login-sub">ID와 비밀번호를 입력하세요</div>
-  <div class="fg"><label class="fl">아이디</label><input class="fi" id="aid" value="admin"></div>
-  <div class="fg"><label class="fl">비밀번호</label><input class="fi" id="apw" type="password" onkeydown="if(event.key==='Enter')subAdmin()"></div>
-  <div class="err-msg" id="aerr"></div>
-  <button class="btn gold" style="width:100%;justify-content:center;margin-top:1rem;padding:14px" onclick="subAdmin()">로그인</button>`;}
-
-function renderLPin(){
-  const w=users[lTarget];if(!w)return"";
-  const on=sessions[w.id]&&sessions[w.id].sessionId;
-  return`<div style="cursor:pointer;margin-bottom:1.25rem;color:#888;font-size:0.9em;font-weight:400" onclick="back()">← 뒤로</div>
-  <div style="margin-bottom:1.35rem">
-    <div style="font-size:1.4em;font-weight:400;color:#F5A800">${w.name}</div>
-    <div style="font-size:0.88em;color:#888;margin-top:4px">${STEPS[w.stepIdx]} 담당</div>
-    ${on?`<div style="font-size:0.85em;color:#F5A800;margin-top:10px;background:#3a2000;padding:9px 13px;border-radius:9px;font-weight:400">⚠ 다른 기기에서 접속 중입니다</div>`:""}
-  </div>
-  <div class="pin-dots" id="pdots">
-    <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-  </div>
-  <div class="pin-grid">
-    ${[1,2,3,4,5,6,7,8,9,"","0","⌫"].map(n=>`<button class="pin-btn" onclick="pinP('${n}')">${n}</button>`).join("")}
-  </div>
-  <div class="err-msg" id="perr"></div>`;}
 
 window.selAdmin=()=>{lStep="admin";renderLogin();}
 window.selWorker=(id)=>{lTarget=id;pinBuf="";lStep="pin";renderLogin();}
@@ -412,9 +438,11 @@ function renderDash(){
             
             <div style="font-size:0.95em;color:#f0f0f0;margin-bottom:8px;line-height:1.3">${o.name}</div>
             <div class="pbar" style="margin-bottom:8px;gap:1px">${STEPS.map((s,i)=>{const c2=o.steps&&o.steps[i]===2?"ps-d":o.steps&&o.steps[i]===1?(i===FREE_STEP?"ps-free":"ps-a"):"ps-p";return`<div class="ps ${c2}" title="${s}">${s}</div>`;}).join("")}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px">
+              ${o.steps?o.steps.map((s,i)=>s===2?`<span style="font-size:0.65em;background:#1a3a1a;color:#6FCF6F;padding:1px 5px;border-radius:4px">${STEPS[i]} 완료</span>`:s===1?`<span style="font-size:0.65em;background:#1a3a5c;color:#7EC8E3;padding:1px 5px;border-radius:4px;border:1px solid #378ADD">${STEPS[i]} 진행중</span>`:"").filter(Boolean).join(""):""} 
+            </div>
             <div style="display:flex;justify-content:space-between;align-items:center">
-              <span class="badge ${stC[st]}" style="font-size:0.72em">${stL[st]}</span>
-              <span style="font-size:0.75em;color:#888">${o.due}</span>
+              <span style="font-size:0.72em;color:#888">납기 ${o.due}</span>
             </div>
           </div>`;
         }).join("")}
@@ -464,7 +492,7 @@ function renderList(){
   </div>
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
     <div style="font-size:0.85em;color:#666">${list.length}/${Object.keys(orders).length}건</div>
-    <button class="btn gold" onclick="openAdd()">+ 수주 등록</button>
+    ${canRegister()?`<button class="btn gold" onclick="openAdd()">+ 수주 등록</button>`:""}
   </div>
   ${list.length===0?`<div class="empty">해당 조건의 수주가 없습니다</div>`:list.sort((a,b)=>(b.id||"").localeCompare(a.id||"")).map(o=>cardH(o)).join("")}`;}
 
