@@ -11,11 +11,11 @@ html.fs-medium{font-size:16px}
 html.fs-large{font-size:19px}
 html.fs-xlarge{font-size:22px}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:inherit;background:#111;color:#f0f0f0}
-.header{background:#1a1a1a;border-bottom:3px solid #F5A800;padding:14px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:50;flex-wrap:wrap}
+.header{background:#1a1a1a;border-bottom:3px solid #F5A800;padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;flex-wrap:nowrap}
 .header-logo{width:44px;height:44px;flex-shrink:0}
 .header-title{font-size:1.3em;font-weight:400;color:#F5A800;line-height:1.2;letter-spacing:0.01em}
 .header-sub{font-size:0.75em;color:#aaa;margin-top:2px;letter-spacing:0.05em}
-.header-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0}
 .nav{display:flex;gap:4px;background:#111;border-radius:10px;padding:4px}
 .ntab{padding:9px 16px;border-radius:8px;border:none;background:transparent;font-size:0.88em;color:#888;cursor:pointer;font-family:inherit;white-space:nowrap;font-weight:400}
 .ntab.on{background:#F5A800;color:#111;font-weight:400}
@@ -34,7 +34,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .slabel{font-size:0.82em;color:#888;margin-bottom:5px;font-weight:400}
 .sval{font-size:2em;font-weight:400}
 .sval.gold{color:#F5A800}.sval.blue{color:#7EC8E3}.sval.green{color:#6FCF6F}.sval.red{color:#FF8A80}
-.alert-bar{background:#3a2000;border:2px solid #F5A800;border-radius:12px;padding:13px 16px;margin-bottom:1rem;font-size:0.95em;color:#F5A800;display:flex;align-items:flex-start;gap:10px;font-weight:400}
+.alert-bar{background:#3a2000;border:2px solid #F5A800;border-radius:12px;padding:13px 16px;margin-bottom:1rem;font-size:0.95em;color:#F5A800;display:flex;align-items:center;gap:10px;font-weight:400;line-height:1.4}
 .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:6px}
 .sh-title{font-size:1.05em;font-weight:400;color:#F5A800}
 .btn{padding:9px 18px;border-radius:10px;border:1px solid #444;background:#222;font-size:0.88em;cursor:pointer;font-family:inherit;color:#f0f0f0;display:inline-flex;align-items:center;gap:6px;touch-action:manipulation;font-weight:400}
@@ -133,11 +133,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 @keyframes spin{to{transform:rotate(360deg)}}
 
 @media(min-width:700px){
-  .client-grid{grid-template-columns:repeat(5,1fr) !important}
+  .client-grid{grid-template-columns:repeat(1,1fr) !important}
 }
 @media(max-width:699px){
-  .client-grid{grid-template-columns:repeat(2,1fr) !important}
+  .client-grid{grid-template-columns:repeat(1,1fr) !important}
 }
+
+@media(max-width:600px){
+  .header{padding:8px 12px;gap:6px}
+  .header-logo{width:32px;height:32px}
+  .header-title{font-size:1em}
+  .header-sub{display:none}
+  .nav .ntab{padding:5px 7px;font-size:0.75em}
+  .uname{font-size:0.82em}
+}
+
+.login-right{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.login-right-bg{position:absolute;inset:0;background:
+  repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(245,168,0,0.03) 40px,rgba(245,168,0,0.03) 41px),
+  repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(245,168,0,0.03) 40px,rgba(245,168,0,0.03) 41px),
+  radial-gradient(ellipse at 30% 50%,rgba(245,168,0,0.08) 0%,transparent 60%),
+  radial-gradient(ellipse at 80% 20%,rgba(126,200,227,0.06) 0%,transparent 50%),
+  linear-gradient(135deg,#0d0d0d 0%,#1a1a1a 50%,#0d0d0d 100%)}
+.login-right-content{position:relative;z-index:1;text-align:center;padding:2rem}
+.login-right-icon{font-size:5em;opacity:0.15;margin-bottom:1.5rem;display:block}
+.login-right-title{font-size:2em;color:rgba(245,168,0,0.4);margin-bottom:1rem;letter-spacing:0.1em}
+.login-right-steps{display:flex;flex-direction:column;gap:18px;margin-top:2rem}
+.login-right-step{display:flex;align-items:center;gap:16px;opacity:0.25}
+.login-right-step-num{width:36px;height:36px;border-radius:50%;border:1px solid #F5A800;display:flex;align-items:center;justify-content:center;font-size:0.9em;color:#F5A800;flex-shrink:0}
+.login-right-step-text{text-align:left}
+.login-right-step-label{font-size:0.85em;color:#F5A800}
+.login-right-step-sub{font-size:0.75em;color:#888;margin-top:2px}
+@media(max-width:700px){.login-right{display:none}.login-card{max-width:100%;border-radius:0}}
 </style>
 </head>
 <body>
@@ -199,7 +226,6 @@ function hdr(){
     </div>`}
     <div style="display:flex;align-items:center;gap:8px">
       <span class="uname">${sess.name}</span>
-      <span class="badge ${sess.role==="admin"?"b-admin":"b-worker"}">${sess.role==="admin"?"관리자":STEPS[sess.stepIdx]}</span>
       <button class="btn" onclick="logout()" style="padding:6px 12px;font-size:0.79em">로그아웃</button>
     </div>
   </div>
@@ -252,14 +278,14 @@ window.changePin=()=>{
     if(op!==users.admin.pw){e.textContent="현재 비밀번호가 틀렸습니다.";return;}
     if(np.length<4){e.textContent="4자 이상 입력하세요.";return;}
     if(np!==np2){e.textContent="새 비밀번호가 일치하지 않습니다.";return;}
-    saveUser("admin",{...users.admin,pw:np});e.style.color="#6FCF6F";e.textContent="변경 완료!";
+    saveUser("admin",{...users.admin,pw:np});alert("비밀번호가 변경되었습니다.");alert("PIN이 변경되었습니다.");
   }else{
     if(!/^\d{4}$/.test(op)||op!==sess.pin){e.textContent="현재 PIN이 틀렸습니다.";return;}
     if(!/^\d{4}$/.test(np)){e.textContent="PIN은 숫자 4자리여야 합니다.";return;}
     if(np!==np2){e.textContent="새 PIN이 일치하지 않습니다.";return;}
     const key=Object.keys(users).find(k=>users[k].id===sess.id);
     if(key){saveUser(key,{...users[key],pin:np});sess={...sess,pin:np};}
-    e.style.color="#6FCF6F";e.textContent="변경 완료!";
+    alert("PIN이 변경되었습니다.");
   }
 }
 
@@ -273,17 +299,18 @@ function renderLSel(){
   </div>
   <div class="login-sub">계정을 선택하세요</div>
   <div class="user-row" onclick="selAdmin()">
-    <div style="flex:1"><div class="urow-name">관리자</div><div class="urow-sub">ID / PW 로그인</div></div>
-    <span class="badge b-admin">관리자</span>
+    <div style="flex:1">
+      <div style="font-size:1.2em;color:#f0f0f0">관리자</div>
+      <div style="font-size:1em;color:#F5A800;margin-top:4px">ID / PW 로그인</div>
+    </div>
   </div>
   <div style="height:1px;background:#2a2a2a;margin:13px 0"></div>
-  ${wList().map(w=>{const on=sessions[w.id]&&sessions[w.id].sessionId;return`<div class="user-row ${on?"online":""}" onclick="selWorker('${w.id}')">
+  ${(()=>{const BG=["rgba(30,42,80,0.6)","rgba(20,50,30,0.6)","rgba(60,20,20,0.6)","rgba(30,20,60,0.6)","rgba(60,40,10,0.6)","rgba(10,40,50,0.6)","rgba(40,40,10,0.6)"];const BC=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5DD8D8","#E8C86F"];return wList().map((w,wi)=>{const on=sessions[w.id]&&sessions[w.id].sessionId;const bg=BG[w.stepIdx%BG.length];const bc=BC[w.stepIdx%BC.length];return`<div class="user-row ${on?"online":""}" style="background:${bg};border-color:${bc}44" onclick="selWorker('${w.id}')">
     <div style="flex:1">
-      <div class="urow-name" style="display:flex;align-items:center;gap:8px">${w.name}${on?` <span style="font-size:0.7em;color:#F5A800;background:#3a2000;padding:2px 8px;border-radius:10px">접속중</span>`:""}</div>
-      <div class="urow-sub">${STEPS[w.stepIdx]} 담당</div>
+      <div style="font-size:1.2em;color:#f0f0f0;display:flex;align-items:center;gap:8px">${w.name}${on?` <span style="font-size:0.65em;color:#F5A800;background:#3a2000;padding:2px 8px;border-radius:10px">접속중</span>`:""}</div>
+      <div style="font-size:1em;color:${bc};margin-top:4px">${STEPS[w.stepIdx]} 담당</div>
     </div>
-    <span class="badge b-worker">PIN</span>
-  </div>`;}).join("")}`;}
+  </div>`;}).join("");})()}`;}
 
 function renderLAdmin(){
   return`<div style="cursor:pointer;margin-bottom:1.25rem;color:#888;font-size:0.9em;font-weight:400" onclick="back()">← 뒤로</div>
@@ -335,7 +362,7 @@ function renderWorker(){
   ${near.length?`<div class="alert-bar">🔔 납기 임박: <strong>${near.map(o=>o.id).join(", ")}</strong></div>`:""}
   ${myActive.length?`<div class="complete-zone"><div class="complete-zone-title">▶ 내 공정 진행 중 — ${STEPS[si]}</div>${myActive.map(o=>wCard(o,si,"my")).join("")}</div>`:`<div class="empty" style="font-size:1em">현재 진행 중인 ${STEPS[si]} 작업이 없습니다</div>`}
   ${freeActive.length?`<div class="free-zone"><div class="free-zone-title">🔧 후가공 대기 — 누구나 완료 가능 (${freeActive.length}건)</div>${freeActive.map(o=>wCard(o,FREE_STEP,"free")).join("")}</div>`:""}
-  ${myDone.length?`<div class="sh" style="margin-top:0.75rem"><div class="sh-title" style="color:#555;font-size:0.9em">완료 (${myDone.length}건)</div></div>${myDone.map(o=>`<div class="ocard" style="cursor:default;opacity:0.45"><div class="otop"><div><div class="oid">${o.id}</div><div class="oname">${o.name}</div></div><span class="badge b-done">완료</span></div></div>`).join("")}`:""}`;}
+  ${myDone.length?`<div class="sh" style="margin-top:0.75rem"><div class="sh-title" style="color:#555;font-size:0.9em">완료 (${myDone.length}건)</div></div>${myDone.map(o=>`<div class="ocard" style="cursor:default;opacity:0.45"><div class="otop"><div><div class="oname">${o.name}</div></div><span class="badge b-done">완료</span></div></div>`).join("")}`:""}`;}
 
 function wCard(o,si,type){return`<div class="work-card" style="border-color:${type==="free"?"#F5A800":"#3B6D11"}">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px">
@@ -356,6 +383,11 @@ function renderDash(){
   const el=document.getElementById("v-main"),oList=Object.values(orders),total=oList.length;
   const done=oList.filter(o=>gSt(o)==="done").length,delay=oList.filter(o=>gSt(o)==="delay").length,ongoing=oList.filter(o=>gSt(o)==="ongoing").length;
   const near=oList.filter(o=>{const d=dl(o.due);return d>=0&&d<=3&&gSt(o)!=="done";});
+  const clientMap={};
+  oList.forEach(o=>{const c=o.client||"미정";if(!clientMap[c])clientMap[c]=[];clientMap[c].push(o);});
+  const CLIENT_BG=["#1a1a2e","#1a2a1a","#2a1a1a","#1a1a2a","#2a1a2a","#1a2a2a","#2a2a1a","#1e1a10","#101e1e","#1e101e"];
+  const CLIENT_BC=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5DD8D8","#E8C86F","#FFB347","#98FB98","#DDA0DD"];
+  const clientKeys=Object.keys(clientMap);
   el.innerHTML=`
   <div class="stats">
     <div class="scard"><div class="slabel">전체 수주</div><div class="sval gold">${total}</div></div>
@@ -363,13 +395,56 @@ function renderDash(){
     <div class="scard"><div class="slabel">완료</div><div class="sval green">${done}</div></div>
     <div class="scard"><div class="slabel">지연</div><div class="sval red">${delay}</div></div>
   </div>
-  ${near.length?`<div class="alert-bar">🔔 납기 임박 (D-3 이내): <strong>${near.map(o=>o.id).join(", ")}</strong></div>`:""}
-  <div class="section-card">
-    <div class="sc-title">공정별 현황</div>
-    ${STEPS.map((s,i)=>{const d=oList.filter(o=>o.steps&&o.steps[i]===2).length,a=oList.filter(o=>o.steps&&o.steps[i]===1).length,p=total?Math.round((d/total)*100):0;return`<div class="prog-bar-row"><div class="pb-label">${s}</div><div class="pb-track"><div class="pb-fill ${d===total&&total>0?"pf-done":""}" style="width:${p}%"></div></div><div class="pb-count">${d}완료${a?` · ${a}진행`:""}</div></div>`;}).join("")}
-  </div>
-  <div class="sh"><div class="sh-title">최근 수주</div><button class="btn" onclick="sTab('list')" style="font-size:0.82em">전체 보기 →</button></div>
-  ${Object.values(orders).sort((a,b)=>(b.id||"").localeCompare(a.id||"")).slice(0,3).map(o=>cardH(o)).join("")}`;}
+  ${near.length?`<div class="alert-bar" style="cursor:pointer;flex-direction:column;align-items:flex-start;gap:6px" onclick="showNearModal()"><div>🔔 납기 임박 (D-3 이내) — 탭하여 확인</div>${near.map(o=>`<div style="font-size:0.9em;padding-left:4px">· <strong>${o.client}</strong> / ${o.name} <span style="color:#aaa;font-size:0.85em">${o.due}</span></div>`).join("")}</div>`:""}
+  <div class="sh" style="margin-bottom:14px"><div class="sh-title">업체별 수주 현황</div></div>
+  ${clientKeys.length===0?'<div class="empty">등록된 수주가 없습니다</div>':clientKeys.map((c,ci)=>{
+    const bg=CLIENT_BG[ci%CLIENT_BG.length];
+    const bc=CLIENT_BC[ci%CLIENT_BC.length];
+    const items=clientMap[c];
+    return`<div style="background:${bg};border:1px solid ${bc}44;border-radius:14px;padding:14px 16px;margin-bottom:14px">
+      <div style="font-size:1.1em;color:${bc};margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid ${bc}33">${c} <span style="font-size:0.75em;color:#888;margin-left:6px">${items.length}건</span></div>
+      <div class="client-grid" style="display:grid;gap:8px">
+        ${items.map(o=>{
+          const st=gSt(o),d=dl(o.due);
+          return`<div style="background:#111;border-radius:10px;padding:10px 10px;border:1px solid ${st==="delay"?"#FF8A80":st==="done"?"#3B6D11":"#2a2a2a"};cursor:pointer" onclick="openDetail('${o.id}')">
+            
+            <div style="font-size:0.95em;color:#f0f0f0;margin-bottom:8px;line-height:1.3">${o.name}</div>
+            <div class="pbar" style="margin-bottom:8px;gap:1px">${STEPS.map((s,i)=>{const c2=o.steps&&o.steps[i]===2?"ps-d":o.steps&&o.steps[i]===1?(i===FREE_STEP?"ps-free":"ps-a"):"ps-p";return`<div class="ps ${c2}" title="${s}">${s}</div>`;}).join("")}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span class="badge ${stC[st]}" style="font-size:0.72em">${stL[st]}</span>
+              <span style="font-size:0.75em;color:#888">${o.due}</span>
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+  }).join("")}`;
+}
+
+window.showNearModal=()=>{
+  const near=Object.values(orders).filter(o=>{const d=dl(o.due);return d>=0&&d<=3&&gSt(o)!=="done";});
+  showOv(`<div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <div class="mtitle" style="margin-bottom:0">🔔 납기 임박 수주</div>
+      <button class="btn" onclick="closeOv()" style="padding:5px 11px">✕</button>
+    </div>
+    ${near.map(o=>{const d=dl(o.due);return`
+    <div style="background:#1e1e1e;border:1px solid #FF8A80;border-radius:12px;padding:13px 15px;margin-bottom:10px;cursor:pointer" onclick="closeOv();setTimeout(()=>openDetail('${o.id}'),100)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div>
+          
+          <div style="font-size:0.88em;color:#ccc;margin-top:2px">${o.name}</div>
+          <div style="font-size:0.82em;color:#888;margin-top:2px">${o.client}</div>
+        </div>
+        <span class="badge b-delay">D-${Math.max(0,d)}</span>
+      </div>
+      <div style="font-size:0.82em;color:#aaa">현재 공정: ${curStep(o)}</div>
+      <div style="font-size:0.79em;color:#666;margin-top:4px">탭하여 상세 보기</div>
+    </div>`;}).join("")}
+    <div class="mfoot"><button class="btn" onclick="closeOv()">닫기</button></div>
+  </div>`);
+}
+
 
 function renderList(){
   const el=document.getElementById("v-main");
@@ -393,7 +468,7 @@ function renderList(){
 
 function cardH(o){const st=gSt(o),d=dl(o.due);return`<div class="ocard ${st==="delay"?"delay-card":""}" onclick="openDetail('${o.id}')">
   <div class="otop">
-    <div><div class="oid">${o.id}</div><div class="oname">${o.name}</div><div class="oclient">${o.client}</div></div>
+    <div><div class="oname">${o.name}</div><div class="oclient">${o.client}</div></div>
     <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
       <span class="badge ${stC[st]}">${stL[st]}</span>
       ${d<=3&&st!=="done"?`<span class="badge b-delay">D-${Math.max(0,d)}</span>`:""}
@@ -401,7 +476,7 @@ function cardH(o){const st=gSt(o),d=dl(o.due);return`<div class="ocard ${st==="d
   </div>
   <div class="pbar">${STEPS.map((s,i)=>{const c=o.steps&&o.steps[i]===2?"ps-d":o.steps&&o.steps[i]===1?(i===FREE_STEP?"ps-free":"ps-a"):"ps-p";return`<div class="ps ${c}" title="${s}">${s}</div>`;}).join('<span style="font-size:0.55em;color:#333">›</span>')}</div>
   <div style="margin-top:8px"><div class="prog-wrap"><div class="prog-fill ${pct(o)===100?"done-fill":""}" style="width:${pct(o)}%"></div></div></div>
-  <div class="ometa"><span>${o.qty}개</span><span>납기 ${o.due} (${d>=0?`D-${d}`:`D+${Math.abs(d)}`})</span><span>${curStep(o)}</span><span>${pct(o)}%</span></div>
+  <div class="ometa"><span>${o.qty}개</span><span>납기 ${o.due}</span><span>${curStep(o)}</span><span>${pct(o)}%</span></div>
 </div>`;}
 
 window.openDetail=(id)=>{
@@ -414,7 +489,7 @@ window.openDetail=(id)=>{
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
       <span class="badge ${stC[st]}">${stL[st]}</span>
-      <span style="font-size:0.82em;color:#888">납기 ${o.due} (D-${dl(o.due)})</span>
+      <span style="font-size:0.82em;color:#888">납기 ${o.due}</span>
       ${o.post?`<span style="font-size:0.82em;color:#888">후가공: ${o.post}</span>`:""}
       ${o.coat?`<span style="font-size:0.82em;color:#888">도장: ${o.coat}</span>`:""}
     </div>
@@ -456,14 +531,14 @@ window.delOrderUI=(id)=>{if(!confirm("삭제하시겠습니까?"))return;const k
 
 window.openAdd=()=>{showOv(`<div class="modal">
   <div class="mtitle">수주 등록</div>
-  <div class="fr"><div class="fg"><label class="fl">수주번호</label><input class="fi" id="ai-id" value="${nextId()}" readonly style="background:#111;color:#888;cursor:not-allowed"></div><div class="fg"><label class="fl">거래처</label><input class="fi" id="ai-cl" placeholder="거래처명"></div></div>
+  <div class="fg"><label class="fl">거래처</label><input class="fi" id="ai-cl" placeholder="거래처명"></div>
   <div class="fg"><label class="fl">품명</label><input class="fi" id="ai-nm" placeholder="품명 또는 설명"></div>
   <div class="fg"><label class="fl">납기일</label><input class="fi" id="ai-du" type="date" value="${dd()}"></div>
-  <div class="fg"><label class="fl">도면작업 담당자</label><select class="fi" id="ai-wk"><option value="미지정">미지정</option>${wNames().map(w=>`<option>${w}</option>`).join("")}</select></div>
+  <div class="fg"><label class="fl">도면작업 담당자</label><select class="fi" id="ai-wk"><option value="미지정">미지정</option><option>김오기</option><option>안성민</option><option>박은희</option></select></div>
   <div class="mfoot"><button class="btn" onclick="closeOv()">취소</button><button class="btn gold" onclick="subAdd()">+ 등록</button></div>
 </div>`);}
 
-window.subAdd=()=>{const id=document.getElementById("ai-id").value.trim(),cl=document.getElementById("ai-cl").value.trim(),nm=document.getElementById("ai-nm").value.trim(),du=document.getElementById("ai-du").value,wk=document.getElementById("ai-wk").value;if(!id||!cl||!nm){alert("거래처, 품명은 필수입니다.");return;}const key="order_"+Date.now();set(ref(db,`orders/${key}`),{id,client:cl,name:nm,qty:1,due:du,post:"",coat:"",steps:[1,0,0,0,0,0,0],notes:["","","","","","",""],workers:[wk,"미지정","미지정","미지정","미지정","미지정","미지정"],created:td(),history:[{t:td(),msg:"수주 등록"}]});closeOv();}
+window.subAdd=()=>{const cl=document.getElementById("ai-cl").value.trim(),nm=document.getElementById("ai-nm").value.trim(),du=document.getElementById("ai-du").value,wk=document.getElementById("ai-wk").value;if(!cl||!nm){alert("거래처, 품명은 필수입니다.");return;}const id=nextId();const key="order_"+Date.now();set(ref(db,`orders/${key}`),{id,client:cl,name:nm,qty:1,due:du,post:"",coat:"",steps:[1,0,0,0,0,0,0],notes:["","","","","","",""],workers:[wk,"미지정","미지정","미지정","미지정","미지정","미지정"],created:td(),history:[{t:td(),msg:"수주 등록"}]});closeOv();}
 
 window.openEdit=(id)=>{const o=Object.values(orders).find(x=>x.id===id);if(!o)return;closeOv();setTimeout(()=>showOv(`<div class="modal">
   <div class="mtitle">수주 수정 — ${o.id}</div>
