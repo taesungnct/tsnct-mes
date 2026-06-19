@@ -438,7 +438,7 @@ function renderLPin(){
   <div style="margin-bottom:1.35rem">
     <div style="font-size:1.4em;font-weight:400;color:var(--gold)">${w.name}</div>
     <div style="font-size:0.88em;color:var(--text-mute);margin-top:4px">${STEPS[w.stepIdx]} 담당</div>
-    ${on?`<div style="font-size:0.85em;color:var(--red);margin-top:10px;background:var(--red-bg);padding:9px 13px;border-radius:9px;font-weight:600">🔒 다른 기기에서 로그인 중입니다. 그 기기에서 먼저 로그아웃해주세요.</div>`:""}
+    ${on?(w.canRegister?`<div style="font-size:0.85em;color:var(--gold);margin-top:10px;background:var(--gold-bg);padding:9px 13px;border-radius:9px;font-weight:600">ℹ 다른 기기에서도 접속 중입니다 (중복 로그인 가능)</div>`:`<div style="font-size:0.85em;color:var(--red);margin-top:10px;background:var(--red-bg);padding:9px 13px;border-radius:9px;font-weight:600">🔒 다른 기기에서 로그인 중입니다. 그 기기에서 먼저 로그아웃해주세요.</div>`):""}
   </div>
   <div class="pin-dots" id="pdots">
     <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
@@ -457,7 +457,7 @@ window.pinP=(n)=>{if(n==="")return;if(n==="⌫"){pinBuf=pinBuf.slice(0,-1);updDo
   if(w&&pinBuf===w.pin){
     const s=sessions[w.id];
     const SESSION_TTL=8*60*60*1000;
-    const alreadyOnline=s&&s.sessionId&&s.sessionId!==mySessionId&&(Date.now()-(s.at||0))<SESSION_TTL;
+    const alreadyOnline=!w.canRegister&&s&&s.sessionId&&s.sessionId!==mySessionId&&(Date.now()-(s.at||0))<SESSION_TTL;
     if(alreadyOnline){
       const e=document.getElementById("perr");
       if(e)e.textContent="다른 기기에서 이미 로그인 중입니다. 먼저 로그아웃해주세요.";
