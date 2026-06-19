@@ -345,11 +345,11 @@ function renderLSel(){
   const BG=["rgba(30,42,80,0.6)","rgba(20,50,30,0.6)","rgba(60,20,20,0.6)","rgba(30,20,60,0.6)","rgba(60,40,10,0.6)","rgba(10,40,50,0.6)","rgba(40,40,10,0.6)"];
   const BC=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5DD8D8","#E8C86F"];
   const LOGIN_STEPS=[{si:0,label:"도면작업"},{si:1,label:"레이저"},{si:2,label:"절곡"},{si:3,label:"용접"},{si:5,label:"도장/도금"}];
-  return `<div style="display:flex;align-items:center;gap:14px;margin-bottom:1.35rem">
-    <img class="login-logo" src="${LOGO}" alt="TS">
-    <div><div class="login-title">태성NCT</div><div style="font-size:0.82em;color:#888;margin-top:2px;letter-spacing:0.05em">생산관리현황</div></div>
+  return `<div style="display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:1.6rem">
+    <img class="login-logo" src="${LOGO}" alt="TS" style="width:64px;height:64px;margin-bottom:14px">
+    <div class="login-title" style="font-size:1.5em">태성NCT</div>
+    <div style="font-size:0.85em;color:#F5A800;margin-top:4px;letter-spacing:0.12em;font-weight:400">생산관리시스템</div>
   </div>
-  <div class="login-sub">공정을 선택하세요</div>
   <div class="user-row" onclick="selAdmin()" style="margin-bottom:8px">
     <div style="flex:1">
       <div style="font-size:1.2em;color:#f0f0f0">관리자</div>
