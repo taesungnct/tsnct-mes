@@ -52,7 +52,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .oname{font-size:0.9em;color:#ccc;margin-top:3px;font-weight:400}
 .oclient{font-size:0.82em;color:#888;margin-top:3px}
 .pbar{display:flex;gap:3px;align-items:center;flex-wrap:wrap}
-.ps{flex:1;min-width:28px;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.62em;font-weight:400}
+.ps{flex:1;min-width:0;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:clamp(8px,0.62em,12px);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 2px}
 .ps-d{background:#1a3a1a;color:#6FCF6F;border:1px solid #3B6D11}
 .ps-a{background:#1a3a5c;color:#7EC8E3;border:2px solid #378ADD}
 .ps-p{background:#1a1a1a;color:#444;border:1px solid #2a2a2a}
@@ -600,14 +600,25 @@ window.openDetail=(id)=>{
     </div>
   </div>`);}
 
+function getCompletedBy(o,i){
+  if(!o.history)return null;
+  const re=new RegExp(`^${STEPS[i].replace("/","\\/")} 완료 \\((.+)\\)$`);
+  for(let h of o.history){
+    const m=h.msg&&h.msg.match(re);
+    if(m)return m[1];
+  }
+  return null;
+}
+
 function renderPL(o){return STEPS.map((s,i)=>{
   const sv=o.steps?o.steps[i]:0,ic=sv===2?"d":sv===1?"a":"p",piC=sv===2?"d":sv===1?"a":"",wk=(o.workers&&o.workers[i])||"미지정",isFree=i===FREE_STEP;
   const adminOnly=isAdmin();
+  const completedBy=sv===2?getCompletedBy(o,i):null;
   return`<div class="pi ${piC} ${isFree&&sv===1?"free":""}">
     <div class="pico ${isFree&&sv===1?"free-i":ic}">${sv===2?"✓":sv===1?(isFree?"🔧":"▶"):(i+1)}</div>
     <div style="flex:1;min-width:0">
       <div class="pname">${s}${isFree?` <span style="font-size:0.65em;color:#F5A800;background:#3a2000;padding:1px 7px;border-radius:8px">누구나</span>`:""}</div>
-      ${!isFree?(adminOnly?`<div class="pworker">담당: <select style="font-size:0.82em;border:none;background:transparent;font-family:inherit;color:#888;cursor:pointer" onchange="setWk('${o.id}',${i},this.value)"><option value="미지정" ${wk==="미지정"?"selected":""}>미지정</option>${wNames().map(w=>`<option value="${w}" ${w===wk?"selected":""}>${w}</option>`).join("")}</select></div>`:`<div class="pworker">담당: ${wk}</div>`):`<div class="pworker" style="color:#F5A800;font-weight:400">누구나 완료 가능</div>`}
+      ${sv===2?`<div class="pworker" style="color:#6FCF6F">완료: ${completedBy||"미확인"}</div>`:!isFree?(adminOnly?`<div class="pworker">담당: <select style="font-size:0.82em;border:none;background:transparent;font-family:inherit;color:#888;cursor:pointer" onchange="setWk('${o.id}',${i},this.value)"><option value="미지정" ${wk==="미지정"?"selected":""}>미지정</option>${wNames().map(w=>`<option value="${w}" ${w===wk?"selected":""}>${w}</option>`).join("")}</select></div>`:`<div class="pworker">담당: ${wk}</div>`):`<div class="pworker" style="color:#F5A800;font-weight:400">누구나 완료 가능</div>`}
       ${o.notes&&o.notes[i]?`<div class="pnote">📝 ${o.notes[i]}</div>`:""}
       ${adminOnly?`<input class="ni" id="ni-${o.id}-${i}" placeholder="메모 입력..." value="${o.notes&&o.notes[i]||""}" style="display:none" oninput="saveN('${o.id}',${i},this.value)">`:""}
     </div>
@@ -617,6 +628,7 @@ function renderPL(o){return STEPS.map((s,i)=>{
       ${adminOnly?`<button class="btn" style="padding:7px 10px" onclick="togN('${o.id}',${i})">✏</button>`:""}
     </div>
   </div>`;}).join("");}
+
 
 
 window.adv=(id,i)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const u={...o,steps:[...(o.steps||STEPS.map(()=>0))],history:[...(o.history||[])]};if(u.steps[i]===0){const p=u.steps.findIndex(s=>s===1);if(p>=0&&p!==i)return;u.steps[i]=1;u.history.push({t:td(),msg:`${STEPS[i]} 시작 (관리자)`});}else if(u.steps[i]===1){u.steps[i]=2;u.history.push({t:td(),msg:`${STEPS[i]} 완료 (관리자)`});if(i+1<STEPS.length){u.steps[i+1]=1;u.history.push({t:td(),msg:`${STEPS[i+1]} 시작`});}}saveOrder(key,u);setTimeout(()=>openDetail(id),400);}
