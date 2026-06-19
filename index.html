@@ -267,6 +267,7 @@ function deleteUser(key){remove(ref(db,`users/${key}`));}
 function getOrderKey(id){return Object.keys(orders).find(k=>orders[k]&&orders[k].id===id);}
 function setSession(uid){set(ref(db,`sessions/${uid}`),{sessionId:mySessionId,at:Date.now()});}
 function clearSession(uid){remove(ref(db,`sessions/${uid}`));}
+function isOnline(uid){const s=sessions[uid];const SESSION_TTL=8*60*60*1000;return!!(s&&s.sessionId&&(Date.now()-(s.at||0))<SESSION_TTL);}
 
 function hdr(){
   return `<div class="header">
@@ -378,7 +379,7 @@ window.showLoginPicker=function(si){
         <button style="background:transparent;border:1px solid var(--border-strong);color:var(--text-main);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:0.9em" onclick="document.getElementById('login-picker').innerHTML=''">✕</button>
       </div>
       ${workers.map(w=>{
-        const on=sessions[w.id]&&sessions[w.id].sessionId;
+        const on=isOnline(w.id);
         return`<div style="background:${BG[si%BG.length]};border:1px solid ${bc}44;border-radius:12px;padding:16px 18px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="document.getElementById('login-picker').innerHTML='';selWorker('${w.id}')">
           <div>
             <div style="font-size:1.2em;color:var(--text-main)">${w.name}</div>
@@ -432,12 +433,12 @@ function renderLAdmin(){
 
 function renderLPin(){
   const w=users[lTarget];if(!w)return"";
-  const on=sessions[w.id]&&sessions[w.id].sessionId;
+  const on=isOnline(w.id);
   return`<div style="cursor:pointer;margin-bottom:1.25rem;color:var(--text-mute);font-size:0.9em;font-weight:400" onclick="back()">← 뒤로</div>
   <div style="margin-bottom:1.35rem">
     <div style="font-size:1.4em;font-weight:400;color:var(--gold)">${w.name}</div>
     <div style="font-size:0.88em;color:var(--text-mute);margin-top:4px">${STEPS[w.stepIdx]} 담당</div>
-    ${on?`<div style="font-size:0.85em;color:var(--gold);margin-top:10px;background:var(--gold-bg);padding:9px 13px;border-radius:9px;font-weight:400">⚠ 다른 기기에서 접속 중입니다</div>`:""}
+    ${on?`<div style="font-size:0.85em;color:var(--red);margin-top:10px;background:var(--red-bg);padding:9px 13px;border-radius:9px;font-weight:600">🔒 다른 기기에서 로그인 중입니다. 그 기기에서 먼저 로그아웃해주세요.</div>`:""}
   </div>
   <div class="pin-dots" id="pdots">
     <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
@@ -451,7 +452,23 @@ window.selAdmin=()=>{lStep="admin";renderLogin();}
 window.selWorker=(id)=>{lTarget=id;pinBuf="";lStep="pin";renderLogin();}
 window.back=()=>{lStep="select";lTarget=null;pinBuf="";renderLogin();}
 window.subAdmin=()=>{const id=document.getElementById("aid").value.trim(),pw=document.getElementById("apw").value,u=users.admin;if(u&&id===u.id&&pw===u.pw){sess={...u};tab="dash";render();}else document.getElementById("aerr").textContent="아이디 또는 비밀번호가 틀렸습니다.";}
-window.pinP=(n)=>{if(n==="")return;if(n==="⌫"){pinBuf=pinBuf.slice(0,-1);updDots();return;}if(pinBuf.length>=4)return;pinBuf+=String(n);updDots();if(pinBuf.length===4){setTimeout(()=>{const w=users[lTarget];if(w&&pinBuf===w.pin){setSession(w.id);sess={...w};render();}else{const e=document.getElementById("perr");if(e)e.textContent="PIN이 틀렸습니다.";pinBuf="";updDots();}},120);}};
+window.pinP=(n)=>{if(n==="")return;if(n==="⌫"){pinBuf=pinBuf.slice(0,-1);updDots();return;}if(pinBuf.length>=4)return;pinBuf+=String(n);updDots();if(pinBuf.length===4){setTimeout(()=>{
+  const w=users[lTarget];
+  if(w&&pinBuf===w.pin){
+    const s=sessions[w.id];
+    const SESSION_TTL=8*60*60*1000;
+    const alreadyOnline=s&&s.sessionId&&s.sessionId!==mySessionId&&(Date.now()-(s.at||0))<SESSION_TTL;
+    if(alreadyOnline){
+      const e=document.getElementById("perr");
+      if(e)e.textContent="다른 기기에서 이미 로그인 중입니다. 먼저 로그아웃해주세요.";
+      pinBuf="";updDots();
+      return;
+    }
+    setSession(w.id);sess={...w};render();
+  }else{
+    const e=document.getElementById("perr");if(e)e.textContent="PIN이 틀렸습니다.";pinBuf="";updDots();
+  }
+},120);}};
 function updDots(){document.querySelectorAll(".pin-dot").forEach((d,i)=>d.classList.toggle("filled",i<pinBuf.length));}
 window.logout=logout;window.sTab=sTab;
 
@@ -712,7 +729,7 @@ function renderUsers(){const ws=wList();document.getElementById("v-main").innerH
   <div class="sh"><div class="sh-title">계정 관리</div><div style="display:flex;gap:7px"><button class="btn red-btn" onclick="resetAllWorkers()">⟳ 담당자 초기화</button><button class="btn gold" onclick="openAddWk()">+ 담당자 추가</button></div></div>
   <div class="section-card"><div class="sc-title">관리자</div><div class="user-mgmt-row"><div style="flex:1"><div style="font-size:1.05em;font-weight:400">관리자</div><div style="font-size:0.82em;color:var(--text-mute);margin-top:3px">ID: admin · 전체 권한 · 중복 로그인 허용</div></div></div></div>
   <div class="section-card"><div class="sc-title">공정 담당자 (${ws.length}명)</div>
-  ${ws.map(w=>{const on=sessions[w.id]&&sessions[w.id].sessionId;return`<div class="user-mgmt-row"><div style="flex:1"><div style="font-size:1.05em;font-weight:400;display:flex;align-items:center;gap:8px">${w.name}${on?` <span style="font-size:0.7em;color:var(--gold);background:var(--gold-bg);padding:2px 8px;border-radius:10px">접속중</span>`:""}</div><div style="font-size:0.82em;color:var(--text-mute);margin-top:3px">${STEPS[w.stepIdx]} 담당 · PIN: ${"●".repeat(w.pin.length)}</div></div><div style="display:flex;gap:7px"><button class="btn" onclick="openEditWk('${w.id}')" style="font-size:0.85em">✏ 수정</button><button class="btn red-btn" onclick="delWk('${w.id}')" style="font-size:0.85em">🗑</button></div></div>`;}).join("")}
+  ${ws.map(w=>{const on=isOnline(w.id);return`<div class="user-mgmt-row"><div style="flex:1"><div style="font-size:1.05em;font-weight:400;display:flex;align-items:center;gap:8px">${w.name}${on?` <span style="font-size:0.7em;color:var(--gold);background:var(--gold-bg);padding:2px 8px;border-radius:10px">접속중</span>`:""}</div><div style="font-size:0.82em;color:var(--text-mute);margin-top:3px">${STEPS[w.stepIdx]} 담당 · PIN: ${"●".repeat(w.pin.length)}</div></div><div style="display:flex;gap:7px"><button class="btn" onclick="openEditWk('${w.id}')" style="font-size:0.85em">✏ 수정</button><button class="btn red-btn" onclick="delWk('${w.id}')" style="font-size:0.85em">🗑</button></div></div>`;}).join("")}
   </div>`;}
 
 window.resetAllWorkers=()=>{
