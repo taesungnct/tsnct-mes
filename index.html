@@ -249,7 +249,7 @@ function nextId(){const nums=Object.values(orders).map(o=>{const m=o.id&&o.id.ma
 function wList(){return Object.values(users).filter(u=>u.role==="worker");}
 function wNames(){return wList().map(u=>u.name);}
 const isAdmin=()=>sess&&sess.role==="admin";
-const canRegister=()=>isAdmin()||(sess&&sess.canRegister===true);
+const canRegister=()=>isAdmin()||(sess&&sess.role==="worker"&&sess.stepIdx===0);
 const wIdx=()=>sess&&sess.role==="worker"?sess.stepIdx:-1;
 const wName=()=>sess?sess.name:"";
 function gSt(o){if(!o.steps)return"new";if(o.steps.every(s=>s===2))return"done";if(dl(o.due)<0)return"delay";if(o.steps.findIndex(s=>s===1)===-1&&o.steps[0]===0)return"new";return"ongoing";}
@@ -276,13 +276,11 @@ function hdr(){
   <div class="header-right">
     ${isAdmin()?`<div class="nav">
       <button class="ntab ${tab==="dash"?"on":""}" onclick="sTab('dash')">대시보드</button>
-      <button class="ntab ${tab==="list"?"on":""}" onclick="sTab('list')">수주</button>
       <button class="ntab ${tab==="users"?"on":""}" onclick="sTab('users')">계정</button>
       <button class="ntab ${tab==="settings"?"on":""}" onclick="sTab('settings')">설정</button>
     </div>`:`<div class="nav">
       <button class="ntab ${tab==="dash"?"on":""}" onclick="sTab('dash')">대시보드</button>
       <button class="ntab ${tab==="mywork"?"on":""}" onclick="sTab('mywork')">내 공정</button>
-      ${canRegister()?`<button class="ntab ${tab==="list"?"on":""}" onclick="sTab('list')">수주</button>`:""}
       <button class="ntab ${tab==="settings"?"on":""}" onclick="sTab('settings')">설정</button>
     </div>`}
     <div style="display:flex;align-items:center;gap:8px">
@@ -297,10 +295,8 @@ function render(){
   document.getElementById("root").innerHTML=hdr()+`<div class="app"><div id="v-main"></div><div id="ov"></div></div>`;
   if(tab==="settings")renderSettings();
   else if(isAdmin()&&tab==="dash")renderDash();
-  else if(isAdmin()&&tab==="list")renderList();
   else if(isAdmin()&&tab==="users")renderUsers();
   else if(!isAdmin()&&tab==="dash")renderDash();
-  else if(!isAdmin()&&canRegister()&&tab==="list")renderList();
   else if(!isAdmin()&&tab==="mywork")renderWorker();
   else renderWorker();
 }
@@ -369,6 +365,7 @@ window.showLoginPicker=function(si){
   const BC=["#1A5FA8","#2E7D32","#C62828","#5E4FA8","#C8941E","#1B8A8A","#9C7A1E"];
   const BG=["#E3EEFA","#E5F3E0","#FBE4E4","#EDE9F8","#FFF6E5","#E0F4F4","#FAF1DD"];
   const bc=BC[si%BC.length];
+  const bg=BG[si%BG.length];
   const workers=wList().filter(w=>w.stepIdx===si);
   const picker=document.getElementById("login-picker");
   if(!picker)return;
@@ -380,7 +377,7 @@ window.showLoginPicker=function(si){
       </div>
       ${workers.map(w=>{
         const on=isOnline(w.id);
-        return`<div style="background:${BG[si%BG.length]};border:1px solid ${bc}44;border-radius:12px;padding:16px 18px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="document.getElementById('login-picker').innerHTML='';selWorker('${w.id}')">
+        return`<div style="background:${bg};border:1px solid ${bc}44;border-radius:12px;padding:16px 18px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="document.getElementById('login-picker').innerHTML='';selWorker('${w.id}')">
           <div>
             <div style="font-size:1.2em;color:var(--text-main)">${w.name}</div>
             ${on?`<div style="font-size:0.78em;color:var(--gold);margin-top:3px">현재 접속중</div>`:""}
@@ -528,6 +525,8 @@ function renderDash(){
   const near=oList.filter(o=>{const d=dl(o.due);return d>=0&&d<=3&&gSt(o)!=="done";});
   const CLIENT_BG=["#E3EEFA","#E5F3E0","#FBE4E4","#EDE9F8","#FFF6E5","#E0F4F4","#FAF1DD","#FCEAD8","#E6F5E9","#F3E8F5"];
   const CLIENT_BC=["#1A5FA8","#2E7D32","#C62828","#5E4FA8","#C8941E","#1B8A8A","#9C7A1E","#C0682E","#3D8B5A","#8A4FA8"];
+  const CLIENT_BC_DARK=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5FD0D0","#D9B85C","#E8915C","#7FCB9E","#C9A8F5"];
+  const isDark=document.body.classList.contains("theme-dark");
 
   const ongoingList=oList.filter(o=>gSt(o)!=="done");
   const doneList=oList.filter(o=>gSt(o)==="done");
@@ -557,10 +556,10 @@ function renderDash(){
     const keys=Object.keys(clientMap);
     if(keys.length===0)return'<div class="empty">등록된 수주가 없습니다</div>';
     return keys.map((c,ci)=>{
-      const bg=CLIENT_BG[ci%CLIENT_BG.length];
-      const bc=CLIENT_BC[ci%CLIENT_BC.length];
+      const bc=isDark?CLIENT_BC_DARK[ci%CLIENT_BC_DARK.length]:CLIENT_BC[ci%CLIENT_BC.length];
+      const bg=isDark?"var(--bg-card2)":CLIENT_BG[ci%CLIENT_BG.length];
       const items=clientMap[c];
-      return`<div style="background:${bg};border:1px solid ${bc}44;border-radius:14px;padding:14px 16px;margin-bottom:14px;opacity:${opacity}">
+      return`<div style="background:${bg};border:1px solid ${bc}${isDark?"33":"44"};border-radius:14px;padding:14px 16px;margin-bottom:14px;opacity:${opacity}">
         <div style="font-size:1.1em;color:${bc};margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid ${bc}33">${c} <span style="font-size:0.75em;color:var(--text-mute);margin-left:6px">${items.length}건</span></div>
         <div class="client-grid" style="display:grid;gap:8px">${items.map(o=>orderCard(o)).join("")}</div>
       </div>`;
@@ -575,7 +574,7 @@ function renderDash(){
     <div class="scard"><div class="slabel">지연</div><div class="sval red">${delay}</div></div>
   </div>
   ${near.length?`<div class="alert-bar" style="cursor:pointer;flex-direction:column;align-items:flex-start;gap:6px" onclick="showNearModal()"><div>🔔 납기 임박 (D-3 이내) — 탭하여 확인</div>${near.map(o=>`<div style="font-size:0.9em;padding-left:4px">· <strong>${o.client}</strong> / ${o.name} <span style="color:var(--text-mute);font-size:0.85em">${o.due}</span></div>`).join("")}</div>`:""}
-  <div class="sh" style="margin-bottom:14px"><div class="sh-title">업체별 수주 현황</div></div>
+  <div class="sh" style="margin-bottom:14px"><div class="sh-title">업체별 수주 현황</div>${(isAdmin()||canRegister())?`<button class="btn gold" onclick="openAdd()">+ 수주 등록</button>`:""}</div>
   ${clientSection(ongoingMap,1)}
   ${doneList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title" style="color:var(--green)">📦 납품 완료 (${doneList.length}건)</div></div>${clientSection(doneMap,0.65)}`:""}
   `;
@@ -704,23 +703,29 @@ window.saveN=(id,i,v)=>{const key=getOrderKey(id);const o=orders[key];if(!o)retu
 window.togN=(id,i)=>{const inp=document.getElementById(`ni-${id}-${i}`);if(!inp)return;inp.style.display=inp.style.display==="none"?"":"none";}
 window.delOrderUI=(id)=>{if(!confirm("삭제하시겠습니까?"))return;const key=getOrderKey(id);deleteOrder(key);closeOv();}
 
-window.openAdd=()=>{showOv(`<div class="modal">
+window.openAdd=()=>{
+  const drawers=wList().filter(w=>w.stepIdx===0);
+  const lockedWk=(!isAdmin()&&sess&&sess.stepIdx===0)?sess.name:null;
+  const wkField=lockedWk
+    ?`<input class="fi" id="ai-wk" value="${lockedWk}" disabled style="opacity:0.7">`
+    :`<select class="fi" id="ai-wk"><option value="미지정">미지정</option>${drawers.map(w=>`<option>${w.name}</option>`).join("")}</select>`;
+  showOv(`<div class="modal">
   <div class="mtitle">수주 등록</div>
   <div class="fg"><label class="fl">거래처</label><input class="fi" id="ai-cl" placeholder="거래처명"></div>
   <div class="fg"><label class="fl">품명</label><input class="fi" id="ai-nm" placeholder="품명 또는 설명"></div>
   <div class="fg"><label class="fl">납기일</label><input class="fi" id="ai-du" type="date" value="${dd()}"></div>
-  <div class="fg"><label class="fl">도면작업 담당자</label><select class="fi" id="ai-wk"><option value="미지정">미지정</option><option>김오기</option><option>안성민</option><option>박은희</option></select></div>
+  <div class="fg"><label class="fl">도면작업 담당자</label>${wkField}${lockedWk?`<input type="hidden" id="ai-wk-locked" value="${lockedWk}">`:""}</div>
   <div class="mfoot"><button class="btn" onclick="closeOv()">취소</button><button class="btn gold" onclick="subAdd()">+ 등록</button></div>
 </div>`);}
 
-window.subAdd=()=>{const cl=document.getElementById("ai-cl").value.trim(),nm=document.getElementById("ai-nm").value.trim(),du=document.getElementById("ai-du").value,wk=document.getElementById("ai-wk").value;if(!cl||!nm){alert("거래처, 품명은 필수입니다.");return;}const id=nextId();const key="order_"+Date.now();set(ref(db,`orders/${key}`),{id,client:cl,name:nm,qty:1,due:du,post:"",coat:"",steps:[1,0,0,0,0,0,0],notes:["","","","","","",""],workers:[wk,"미지정","미지정","미지정","미지정","미지정","미지정"],created:td(),history:[{t:td(),msg:"수주 등록"}]});closeOv();}
+window.subAdd=()=>{const cl=document.getElementById("ai-cl").value.trim(),nm=document.getElementById("ai-nm").value.trim(),du=document.getElementById("ai-du").value;const lockedEl=document.getElementById("ai-wk-locked");const wk=lockedEl?lockedEl.value:document.getElementById("ai-wk").value;if(!cl||!nm){alert("거래처, 품명은 필수입니다.");return;}const id=nextId();const key="order_"+Date.now();set(ref(db,`orders/${key}`),{id,client:cl,name:nm,qty:1,due:du,post:"",coat:"",steps:[1,0,0,0,0,0,0],notes:["","","","","","",""],workers:[wk,"미지정","미지정","미지정","미지정","미지정","미지정"],created:td(),history:[{t:td(),msg:"수주 등록"}]});closeOv();}
 
 window.openEdit=(id)=>{const o=Object.values(orders).find(x=>x.id===id);if(!o)return;closeOv();const curWk=(o.workers&&o.workers[0])||"미지정";setTimeout(()=>showOv(`<div class="modal">
   <div class="mtitle">수주 수정 — ${o.id}</div>
   <div class="fr"><div class="fg"><label class="fl">거래처</label><input class="fi" id="ei-cl" value="${o.client||""}"></div><div class="fg"><label class="fl">품명</label><input class="fi" id="ei-nm" value="${o.name||""}"></div></div>
   <div class="fr"><div class="fg"><label class="fl">수량</label><input class="fi" id="ei-qt" type="number" value="${o.qty||1}"></div><div class="fg"><label class="fl">납기일</label><input class="fi" id="ei-du" type="date" value="${o.due||""}"></div></div>
   <div class="fr"><div class="fg"><label class="fl">후가공</label><input class="fi" id="ei-po" value="${o.post||""}"></div><div class="fg"><label class="fl">도장/도금</label><input class="fi" id="ei-co" value="${o.coat||""}"></div></div>
-  <div class="fg"><label class="fl">도면작업 담당자</label><select class="fi" id="ei-wk"><option value="미지정" ${curWk==="미지정"?"selected":""}>미지정</option><option ${curWk==="김오기"?"selected":""}>김오기</option><option ${curWk==="안성민"?"selected":""}>안성민</option><option ${curWk==="박은희"?"selected":""}>박은희</option></select></div>
+  <div class="fg"><label class="fl">도면작업 담당자</label><select class="fi" id="ei-wk"><option value="미지정" ${curWk==="미지정"?"selected":""}>미지정</option>${wList().filter(w=>w.stepIdx===0).map(w=>`<option ${curWk===w.name?"selected":""}>${w.name}</option>`).join("")}</select></div>
   <div class="mfoot"><button class="btn" onclick="closeOv()">취소</button><button class="btn gold" onclick="subEdit('${o.id}')">✓ 저장</button></div>
 </div>`),50);}
 
@@ -743,9 +748,9 @@ window.resetAllWorkers=()=>{
 }
 
 window.openAddWk=()=>{showOv(`<div class="modal"><div class="mtitle">담당자 추가</div><div class="fg"><label class="fl">이름</label><input class="fi" id="nw-nm" placeholder="담당자 이름"></div><div class="fg"><label class="fl">담당 공정</label><select class="fi" id="nw-st">${STEPS.map((s,i)=>`<option value="${i}">${s}</option>`).join("")}</select></div><div class="fg"><label class="fl">PIN (숫자 4자리)</label><input class="fi" id="nw-pi" type="number" placeholder="예: 1234"></div><div class="err-msg" id="nw-e"></div><div class="mfoot"><button class="btn" onclick="closeOv()">취소</button><button class="btn gold" onclick="subAddWk()">+ 추가</button></div></div>`);}
-window.subAddWk=()=>{const nm=document.getElementById("nw-nm").value.trim(),si=parseInt(document.getElementById("nw-st").value),pi=document.getElementById("nw-pi").value.trim(),e=document.getElementById("nw-e");if(!nm){e.textContent="이름을 입력하세요.";return;}if(!/^\d{4}$/.test(pi)){e.textContent="PIN은 숫자 4자리여야 합니다.";return;}const uid="w"+Date.now();const userObj={id:uid,name:nm,role:"worker",pin:pi,stepIdx:si};if(si===0)userObj.canRegister=true;saveUser(uid,userObj);closeOv();}
+window.subAddWk=()=>{const nm=document.getElementById("nw-nm").value.trim(),si=parseInt(document.getElementById("nw-st").value),pi=document.getElementById("nw-pi").value.trim(),e=document.getElementById("nw-e");if(!nm){e.textContent="이름을 입력하세요.";return;}if(!/^\d{4}$/.test(pi)){e.textContent="PIN은 숫자 4자리여야 합니다.";return;}const uid="w"+Date.now();const userObj={id:uid,name:nm,role:"worker",pin:pi,stepIdx:si,canRegister:true};saveUser(uid,userObj);closeOv();}
 window.openEditWk=(uid)=>{const w=users[uid];if(!w)return;showOv(`<div class="modal"><div class="mtitle">담당자 수정 — ${w.name}</div><div class="fg"><label class="fl">이름</label><input class="fi" id="ew-nm" value="${w.name}"></div><div class="fg"><label class="fl">담당 공정</label><select class="fi" id="ew-st">${STEPS.map((s,i)=>`<option value="${i}" ${i===w.stepIdx?"selected":""}>${s}</option>`).join("")}</select></div><div class="fg"><label class="fl">새 PIN (변경 시만 입력)</label><input class="fi" id="ew-pi" type="number" placeholder="비워두면 유지"></div><div class="err-msg" id="ew-e"></div><div class="mfoot"><button class="btn" onclick="closeOv()">취소</button><button class="btn gold" onclick="subEditWk('${uid}')">✓ 저장</button></div></div>`);}
-window.subEditWk=(uid)=>{const w=users[uid];if(!w)return;const nm=document.getElementById("ew-nm").value.trim(),si=parseInt(document.getElementById("ew-st").value),pi=document.getElementById("ew-pi").value.trim(),e=document.getElementById("ew-e");if(!nm){e.textContent="이름을 입력하세요.";return;}if(pi&&!/^\d{4}$/.test(pi)){e.textContent="PIN은 숫자 4자리여야 합니다.";return;}const updated={...w,name:nm,stepIdx:si,pin:pi||w.pin};if(si===0)updated.canRegister=true;else delete updated.canRegister;saveUser(uid,updated);closeOv();}
+window.subEditWk=(uid)=>{const w=users[uid];if(!w)return;const nm=document.getElementById("ew-nm").value.trim(),si=parseInt(document.getElementById("ew-st").value),pi=document.getElementById("ew-pi").value.trim(),e=document.getElementById("ew-e");if(!nm){e.textContent="이름을 입력하세요.";return;}if(pi&&!/^\d{4}$/.test(pi)){e.textContent="PIN은 숫자 4자리여야 합니다.";return;}const updated={...w,name:nm,stepIdx:si,pin:pi||w.pin,canRegister:true};saveUser(uid,updated);closeOv();}
 window.delWk=(uid)=>{if(!confirm("삭제하시겠습니까?"))return;clearSession(uid);deleteUser(uid);}
 
 function showOv(html){const a=document.getElementById("ov");if(a)a.innerHTML=`<div class="overlay" onclick="if(event.target===this)closeOv()"><div>${html}</div></div>`;}
