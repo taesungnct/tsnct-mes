@@ -767,7 +767,13 @@ window.openEdit=(id)=>{const o=Object.values(orders).find(x=>x.id===id);if(!o)re
   <div class="mfoot"><button class="btn" onclick="closeOv()">취소</button><button class="btn gold" onclick="subEdit('${o.id}')">✓ 저장</button></div>
 </div>`),50);}
 
-window.subEdit=(id)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const workers=[...(o.workers||STEPS.map(()=>"미지정"))];workers[0]=document.getElementById("ei-wk").value;saveOrder(key,{...o,client:document.getElementById("ei-cl").value.trim()||o.client,name:document.getElementById("ei-nm").value.trim()||o.name,qty:parseInt(document.getElementById("ei-qt").value)||o.qty,due:document.getElementById("ei-du").value||o.due,post:document.getElementById("ei-po").value.trim(),coat:document.getElementById("ei-co").value.trim(),workers});closeOv();}
+window.subEdit=(id)=>{
+  const key=getOrderKey(id);const o=orders[key];if(!o)return;
+  const workers=[...(o.workers||STEPS.map(()=>"미지정"))];
+  workers[0]=document.getElementById("ei-wk").value;
+  saveOrder(key,{...o,client:document.getElementById("ei-cl").value.trim()||o.client,name:document.getElementById("ei-nm").value.trim()||o.name,qty:parseInt(document.getElementById("ei-qt").value)||o.qty,due:document.getElementById("ei-du").value||o.due,post:document.getElementById("ei-po").value.trim(),coat:document.getElementById("ei-co").value.trim(),workers});
+  closeOv();
+}
 
 function renderUsers(){const ws=wList();document.getElementById("v-main").innerHTML=`
   <div class="sh"><div class="sh-title">계정 관리</div><div style="display:flex;gap:7px"><button class="btn red-btn" onclick="resetAllWorkers()">⟳ 담당자 초기화</button><button class="btn gold" onclick="openAddWk()">+ 담당자 추가</button></div></div>
