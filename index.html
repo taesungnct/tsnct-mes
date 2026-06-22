@@ -710,7 +710,10 @@ function getCompletedBy(o,i){
   return null;
 }
 
-function renderPL(o){return STEPS.map((s,i)=>{
+function renderPL(o){
+  const visibleSteps=o.outsource?[0,6]:STEPS.map((_,i)=>i);
+  return visibleSteps.map(i=>{
+  const s=STEPS[i];
   const sv=o.steps?o.steps[i]:0,ic=sv===2?"d":sv===1?"a":"p",piC=sv===2?"d":sv===1?"a":"",wk=(o.workers&&o.workers[i])||"미지정",isFree=i===FREE_STEP;
   const adminOnly=isAdmin();
   const completedBy=sv===2?getCompletedBy(o,i):null;
@@ -731,7 +734,7 @@ function renderPL(o){return STEPS.map((s,i)=>{
 
 
 
-window.adv=(id,i)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const u={...o,steps:[...(o.steps||STEPS.map(()=>0))],history:[...(o.history||[])]};if(u.steps[i]===0){const p=u.steps.findIndex(s=>s===1);if(p>=0&&p!==i)return;u.steps[i]=1;u.history.push({t:td(),msg:`${STEPS[i]} 시작 (관리자)`});}else if(u.steps[i]===1){u.steps[i]=2;u.history.push({t:td(),msg:`${STEPS[i]} 완료 (관리자)`});if(i+1<STEPS.length){u.steps[i+1]=1;u.history.push({t:td(),msg:`${STEPS[i+1]} 시작`});}}saveOrder(key,u);setTimeout(()=>openDetail(id),400);}
+window.adv=(id,i)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const u={...o,steps:[...(o.steps||STEPS.map(()=>0))],history:[...(o.history||[])]};if(u.steps[i]===0){const p=u.steps.findIndex(s=>s===1);if(p>=0&&p!==i)return;u.steps[i]=1;u.history.push({t:td(),msg:`${STEPS[i]} 시작 (관리자)`});}else if(u.steps[i]===1){u.steps[i]=2;u.history.push({t:td(),msg:`${STEPS[i]} 완료 (관리자)`});const next=o.outsource&&i===0?6:i+1;if(next<STEPS.length&&u.steps[next]!==2){u.steps[next]=1;u.history.push({t:td(),msg:`${STEPS[next]} 시작`});}}saveOrder(key,u);setTimeout(()=>openDetail(id),400);}
 window.setWk=(id,i,v)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const u={...o,workers:[...(o.workers||STEPS.map(()=>"미지정"))]};u.workers[i]=v;saveOrder(key,u);}
 window.saveN=(id,i,v)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const notes=[...(o.notes||STEPS.map(()=>""))];notes[i]=v;saveOrder(key,{...o,notes});}
 window.togN=(id,i)=>{const inp=document.getElementById(`ni-${id}-${i}`);if(!inp)return;inp.style.display=inp.style.display==="none"?"":"none";}
