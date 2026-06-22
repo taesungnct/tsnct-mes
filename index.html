@@ -281,7 +281,7 @@ onValue(ref(db,"users"),snap=>{
   render();
 });
 onValue(ref(db,"orders"),snap=>{orders=snap.val()||{};render();});
-setInterval(()=>{const el=document.getElementById("now-bar");if(el)el.textContent=nowText();},30000);
+setInterval(()=>{const el=document.getElementById("now-bar");if(el)el.innerHTML=nowCardHTML();},30000);
 function saveOrder(key,o){set(ref(db,`orders/${key}`),o);}
 function saveUser(key,u){set(ref(db,`users/${key}`),u);}
 function deleteOrder(key){remove(ref(db,`orders/${key}`));}
@@ -291,14 +291,22 @@ function setSession(uid){set(ref(db,`sessions/${uid}`),{sessionId:mySessionId,at
 function clearSession(uid){remove(ref(db,`sessions/${uid}`));}
 function isOnline(uid){const s=sessions[uid];const SESSION_TTL=8*60*60*1000;return!!(s&&s.sessionId&&(Date.now()-(s.at||0))<SESSION_TTL);}
 
-function nowText(){
+function nowParts(){
   const d=new Date(Date.now()+9*3600*1000);
   const y=d.getUTCFullYear(),mo=String(d.getUTCMonth()+1).padStart(2,"0"),da=String(d.getUTCDate()).padStart(2,"0");
   const days=["일","월","화","수","목","금","토"];
   const dow=days[d.getUTCDay()];
   let h=d.getUTCHours();const ampm=h<12?"오전":"오후";h=h%12;if(h===0)h=12;
   const mi=String(d.getUTCMinutes()).padStart(2,"0");
-  return `${y}-${mo}-${da} ${dow}요일 ${ampm} ${String(h).padStart(2,"0")}:${mi}`;
+  return {date:`${y}-${mo}-${da}`,dow:`${dow}요일`,time:`${ampm} ${String(h).padStart(2,"0")}:${mi}`};
+}
+function nowCardHTML(){
+  const p=nowParts();
+  return `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);margin:12px 16px 4px;padding:14px 18px;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap">
+    <span style="font-size:clamp(1.2em,4.5vw,2em);font-weight:700;color:var(--text-main)">${p.date}</span>
+    <span style="font-size:clamp(1em,3.8vw,1.6em);font-weight:700;color:var(--gold)">${p.dow}</span>
+    <span style="font-size:clamp(1em,3.8vw,1.6em);font-weight:700;color:var(--text-main)">${p.time}</span>
+  </div>`;
 }
 function hdr(){
   return `<div class="header">
@@ -320,7 +328,7 @@ function hdr(){
     </div>
   </div>
 </div>
-<div id="now-bar" style="text-align:center;font-size:2.6em;font-weight:700;color:var(--text-main);padding:14px 0 6px">${nowText()}</div>`;}
+<div id="now-bar">${nowCardHTML()}</div>`;}
 
 function render(){
   if(!sess){renderLogin();return;}
@@ -558,6 +566,7 @@ function renderDash(){
   const CLIENT_BG=["#E3EEFA","#E5F3E0","#FBE4E4","#EDE9F8","#FFF6E5","#E0F4F4","#FAF1DD","#FCEAD8","#E6F5E9","#F3E8F5"];
   const CLIENT_BC=["#1A5FA8","#2E7D32","#C62828","#5E4FA8","#C8941E","#1B8A8A","#9C7A1E","#C0682E","#3D8B5A","#8A4FA8"];
   const CLIENT_BC_DARK=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5FD0D0","#D9B85C","#E8915C","#7FCB9E","#C9A8F5"];
+  const CLIENT_BG_DARK=["#1c2733","#1c2a1c","#2e1c1c","#241c2e","#2c2418","#1a2b2b","#2a2618","#2c2018","#1c2820","#26202e"];
   const isDark=document.body.classList.contains("theme-dark");
 
   const ongoingList=oList.filter(o=>gSt(o)!=="done"&&!o.outsource);
@@ -568,7 +577,7 @@ function renderDash(){
   const ongoingMap=groupByClient(ongoingList);
   const doneMap=groupByClient(doneList);
 
-  const orderCard=(o)=>{
+  const orderCard=(o,bc)=>{
     const st=gSt(o),d=dl(o.due);
     const shipped=o.steps&&o.steps[6]===2;
     let shipDate=o.due;
@@ -576,7 +585,10 @@ function renderDash(){
       const h=o.history.filter(x=>x.msg&&x.msg.includes("출하")&&x.msg.includes("완료")).pop();
       if(h)shipDate=h.t;
     }
-    return`<div style="background:var(--bg-card2);border-radius:10px;padding:10px 10px;border:1px solid ${st==="delay"?(document.body.classList.contains("theme-dark")?"#FF8A80":"#C62828"):st==="done"?(document.body.classList.contains("theme-dark")?"#3B6D11":"#9CCB8A"):(document.body.classList.contains("theme-dark")?"#2a2a2a":"#e8e2d6")};cursor:pointer" onclick="openDetail('${o.id}')">
+    const isDark=document.body.classList.contains("theme-dark");
+    const tint="var(--bg-page)";
+    const border=st==="delay"?(isDark?"#FF8A80":"#C62828"):st==="done"?(isDark?"#3B6D11":"#9CCB8A"):`${bc}${isDark?"55":"66"}`;
+    return`<div style="background:${tint};border-radius:10px;padding:10px 10px;border:1px solid ${border};cursor:pointer" onclick="openDetail('${o.id}')">
       <div style="font-size:0.95em;color:var(--text-main);margin-bottom:8px;line-height:1.3">${o.name}</div>
       ${o.outsource?`<div style="display:flex;justify-content:center;align-items:center;height:28px;margin-bottom:8px"><span style="font-size:0.82em;font-weight:700;color:var(--purple);background:var(--purple-bg);padding:4px 18px;border-radius:8px">외주</span></div>`:`<div class="pbar" style="margin-bottom:8px;gap:1px">${STEPS.map((s,i)=>{const c2=o.steps&&o.steps[i]===2?"ps-d":o.steps&&o.steps[i]===1?(i===FREE_STEP?"ps-free":"ps-a"):"ps-p";return`<div class="ps ${c2}" title="${s}">${s}</div>`;}).join("")}</div>`}
       <div style="display:flex;justify-content:flex-end;align-items:center">
@@ -590,11 +602,11 @@ function renderDash(){
     if(keys.length===0)return'<div class="empty">등록된 수주가 없습니다</div>';
     return keys.map((c,ci)=>{
       const bc=isDark?CLIENT_BC_DARK[ci%CLIENT_BC_DARK.length]:CLIENT_BC[ci%CLIENT_BC.length];
-      const bg=isDark?"var(--bg-card2)":CLIENT_BG[ci%CLIENT_BG.length];
+      const bg=isDark?`${bc}33`:CLIENT_BG[ci%CLIENT_BG.length];
       const items=clientMap[c];
       return`<div style="background:${bg};border:1px solid ${bc}${isDark?"33":"44"};border-radius:14px;padding:14px 16px;margin-bottom:14px;opacity:${opacity}">
         <div style="font-size:1.1em;color:${bc};margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid ${bc}33">${c} <span style="font-size:0.75em;color:var(--text-mute);margin-left:6px">${items.length}건</span></div>
-        <div class="client-grid" style="display:grid;gap:8px">${items.map(o=>orderCard(o)).join("")}</div>
+        <div class="client-grid" style="display:grid;gap:8px">${items.map(o=>orderCard(o,bc)).join("")}</div>
       </div>`;
     }).join("");
   };
