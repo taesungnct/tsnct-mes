@@ -509,7 +509,7 @@ function renderWorker(){
   ${near.length?`<div class="alert-bar" style="cursor:pointer;flex-direction:column;align-items:flex-start;gap:6px" onclick="showNearModal()"><div>🔔 납기 임박 (D-3 이내) — 탭하여 확인</div>${near.map(o=>`<div style="font-size:0.9em;padding-left:4px">· <strong>${o.client}</strong> / ${o.name} <span style="color:var(--text-mute);font-size:0.85em">${o.due}</span></div>`).join("")}</div>`:""}
   ${myActive.length?`<div class="complete-zone"><div class="complete-zone-title">▶ 내 공정 진행 중 — ${STEPS[si]}</div>${myActive.map(o=>wCard(o,si,"my")).join("")}</div>`:`<div class="empty" style="font-size:1em">현재 진행 중인 ${STEPS[si]} 작업이 없습니다</div>`}
   ${canShip&&shipActive.length?`<div class="free-zone"><div class="free-zone-title">📦 출하 대기 (${shipActive.length}건)</div>${shipActive.map(o=>wCard(o,SHIP_STEP,"free")).join("")}</div>`:""}
-  ${freeActive.length?`<div class="free-zone"><div class="free-zone-title">🔧 후가공 대기 — 누구나 완료 가능 (${freeActive.length}건)</div>${freeActive.map(o=>wCard(o,FREE_STEP,"free")).join("")}</div>`:""}
+  ${freeActive.length?`<div class="free-zone"><div class="free-zone-title">🔧 후가공 대기 (${freeActive.length}건)</div>${freeActive.map(o=>wCard(o,FREE_STEP,"free")).join("")}</div>`:""}
   ${myDone.length?`<div class="sh" style="margin-top:0.75rem"><div class="sh-title" style="color:var(--text-faint);font-size:0.9em">완료 (${myDone.length}건)</div></div>${myDone.map(o=>`<div class="ocard" style="cursor:default;opacity:0.45"><div class="otop"><div><div class="oname">${o.name}</div></div><span class="badge b-done">완료</span></div></div>`).join("")}`:""}`;}
 
 function wCard(o,si,type){return`<div class="work-card" style="border-color:${type==="free"?"#E0A93A":"#9CCB8A"}">
@@ -720,14 +720,14 @@ function renderPL(o){
   return`<div class="pi ${piC} ${isFree&&sv===1?"free":""}">
     <div class="pico ${isFree&&sv===1?"free-i":ic}">${sv===2?"✓":sv===1?(isFree?"🔧":"▶"):(i+1)}</div>
     <div style="flex:1;min-width:0">
-      <div class="pname">${s}${isFree?` <span style="font-size:0.65em;color:var(--gold);background:var(--gold-bg);padding:1px 7px;border-radius:8px">누구나</span>`:""}</div>
-      ${sv===2?`<div class="pworker" style="color:var(--green)">완료: ${completedBy||"미확인"}</div>`:!isFree?(adminOnly?`<div class="pworker">담당: <select style="font-size:0.82em;border:none;background:transparent;font-family:inherit;color:var(--text-mute);cursor:pointer" onchange="setWk('${o.id}',${i},this.value)"><option value="미지정" ${wk==="미지정"?"selected":""}>미지정</option>${wNames().map(w=>`<option value="${w}" ${w===wk?"selected":""}>${w}</option>`).join("")}</select></div>`:`<div class="pworker">담당: ${wk}</div>`):`<div class="pworker" style="color:var(--gold);font-weight:400">누구나 완료 가능</div>`}
+      <div class="pname">${s}</div>
+      ${sv===2?`<div class="pworker" style="color:var(--green)">완료: ${completedBy||"미확인"}</div>`:!isFree?(adminOnly?`<div class="pworker">담당: <select style="font-size:0.82em;border:none;background:transparent;font-family:inherit;color:var(--text-mute);cursor:pointer" onchange="setWk('${o.id}',${i},this.value)"><option value="미지정" ${wk==="미지정"?"selected":""}>미지정</option>${wNames().map(w=>`<option value="${w}" ${w===wk?"selected":""}>${w}</option>`).join("")}</select></div>`:`<div class="pworker">담당: ${wk}</div>`):""}
       ${o.notes&&o.notes[i]?`<div class="pnote">📝 ${o.notes[i]}</div>`:""}
       ${adminOnly?`<input class="ni" id="ni-${o.id}-${i}" placeholder="메모 입력..." value="${o.notes&&o.notes[i]||""}" style="display:none" oninput="saveN('${o.id}',${i},this.value)">`:""}
     </div>
     <div class="pa">
       ${sv===2?`<span style="font-size:0.88em;color:var(--green);font-weight:400">완료</span>`:sv===1?`<span style="font-size:0.88em;color:var(--blue);font-weight:400">진행중</span>`:`<span style="font-size:0.88em;color:var(--text-faint)">대기</span>`}
-      ${adminOnly&&sv!==2?`<button class="btn ${sv===1?"pri":""}" style="padding:8px 13px;font-size:0.88em" onclick="adv('${o.id}',${i})">${sv===1?"완료":"시작"}</button>`:""}
+      ${adminOnly&&sv===1?`<button class="btn pri" style="padding:8px 13px;font-size:0.88em" onclick="adv('${o.id}',${i})">완료</button>`:""}
       ${adminOnly?`<button class="btn" style="padding:7px 10px" onclick="togN('${o.id}',${i})">✏</button>`:""}
     </div>
   </div>`;}).join("");}
