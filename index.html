@@ -543,7 +543,7 @@ window.wComplete=(oid,si)=>{const key=getOrderKey(oid);const o=orders[key];if(!o
 function renderDash(){
   const el=document.getElementById("v-main"),oList=Object.values(orders),total=oList.length;
   const done=oList.filter(o=>gSt(o)==="done").length,delay=oList.filter(o=>gSt(o)==="delay").length,ongoing=oList.filter(o=>gSt(o)==="ongoing").length;
-  const near=oList.filter(o=>{const d=dl(o.due);return d>=0&&d<=3&&gSt(o)!=="done";});
+  const near=oList.filter(o=>{const d=dl(o.due);return d===0&&gSt(o)!=="done";});
   const CLIENT_BG=["#E3EEFA","#E5F3E0","#FBE4E4","#EDE9F8","#FFF6E5","#E0F4F4","#FAF1DD","#FCEAD8","#E6F5E9","#F3E8F5"];
   const CLIENT_BC=["#1A5FA8","#2E7D32","#C62828","#5E4FA8","#C8941E","#1B8A8A","#9C7A1E","#C0682E","#3D8B5A","#8A4FA8"];
   const CLIENT_BC_DARK=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5FD0D0","#D9B85C","#E8915C","#7FCB9E","#C9A8F5"];
@@ -595,7 +595,7 @@ function renderDash(){
     <div class="scard"><div class="slabel">완료</div><div class="sval green">${done}</div></div>
     <div class="scard"><div class="slabel">지연</div><div class="sval red">${delay}</div></div>
   </div>
-  ${near.length?`<div class="alert-bar" style="cursor:pointer;flex-direction:column;align-items:flex-start;gap:6px" onclick="showNearModal()"><div>🔔 납기 임박 (D-3 이내) — 탭하여 확인</div>${near.map(o=>`<div style="font-size:0.9em;padding-left:4px">· <strong>${o.client}</strong> / ${o.name} <span style="color:var(--text-mute);font-size:0.85em">${o.due}</span></div>`).join("")}</div>`:""}
+  ${near.length?`<div class="alert-bar" style="cursor:pointer;flex-direction:column;align-items:flex-start;gap:6px" onclick="showNearModal()"><div>🔔 오늘 납기 — 탭하여 확인</div>${near.map(o=>`<div style="font-size:0.9em;padding-left:4px">· <strong>${o.client}</strong> / ${o.name} <span style="color:var(--text-mute);font-size:0.85em">${o.due}</span></div>`).join("")}</div>`:""}
   <div class="sh" style="margin-bottom:14px"><div class="sh-title">업체별 수주 현황</div>${(isAdmin()||canRegister())?`<button class="btn gold" onclick="openAdd()">+ 수주 등록</button>`:""}</div>
   ${clientSection(ongoingMap,1)}
   ${outsourceList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title">외주 현황</div></div>${clientSection(groupByClient(outsourceList),1)}`:""}
@@ -604,10 +604,10 @@ function renderDash(){
 }
 
 window.showNearModal=()=>{
-  const near=Object.values(orders).filter(o=>{const d=dl(o.due);return d>=0&&d<=3&&gSt(o)!=="done";});
+  const near=Object.values(orders).filter(o=>{const d=dl(o.due);return d===0&&gSt(o)!=="done";});
   showOv(`<div class="modal">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <div class="mtitle" style="margin-bottom:0">🔔 납기 임박 수주</div>
+      <div class="mtitle" style="margin-bottom:0">🔔 오늘 납기 수주</div>
       <button class="btn" onclick="closeOv()" style="padding:5px 11px">✕</button>
     </div>
     ${near.map(o=>{const d=dl(o.due);return`
