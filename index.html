@@ -269,7 +269,13 @@ onValue(ref(db,"users"),snap=>{
     const savedId=localStorage.getItem("loginId");
     if(savedId){
       const u=Object.values(users).find(u=>u.id===savedId);
-      if(u){sess={...u};if(u.role==="worker")setSession(u.id);}
+      if(u){
+        sess={...u};
+        if(u.role==="worker")setSession(u.id);
+        const savedTab=localStorage.getItem("activeTab");
+        const validTabs=u.role==="admin"?["dash","users","settings"]:["dash","mywork","settings"];
+        if(savedTab&&validTabs.includes(savedTab))tab=savedTab;
+      }
     }
   }
   render();
@@ -315,8 +321,8 @@ function render(){
   else if(!isAdmin()&&tab==="mywork")renderWorker();
   else renderWorker();
 }
-function sTab(t){tab=t;render();}
-function logout(){if(!confirm("로그아웃 하시겠습니까?"))return;if(sess&&sess.role!=="admin")clearSession(sess.id);localStorage.removeItem("loginId");sess=null;lStep="select";lTarget=null;pinBuf="";render();}
+function sTab(t){tab=t;localStorage.setItem("activeTab",t);render();}
+function logout(){if(!confirm("로그아웃 하시겠습니까?"))return;if(sess&&sess.role!=="admin")clearSession(sess.id);localStorage.removeItem("loginId");localStorage.removeItem("activeTab");sess=null;tab="dash";lStep="select";lTarget=null;pinBuf="";render();}
 
 function renderSettings(){
   document.getElementById("v-main").innerHTML=`
