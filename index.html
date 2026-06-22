@@ -281,6 +281,7 @@ onValue(ref(db,"users"),snap=>{
   render();
 });
 onValue(ref(db,"orders"),snap=>{orders=snap.val()||{};render();});
+setInterval(()=>{const el=document.getElementById("now-bar");if(el)el.textContent=nowText();},30000);
 function saveOrder(key,o){set(ref(db,`orders/${key}`),o);}
 function saveUser(key,u){set(ref(db,`users/${key}`),u);}
 function deleteOrder(key){remove(ref(db,`orders/${key}`));}
@@ -290,6 +291,15 @@ function setSession(uid){set(ref(db,`sessions/${uid}`),{sessionId:mySessionId,at
 function clearSession(uid){remove(ref(db,`sessions/${uid}`));}
 function isOnline(uid){const s=sessions[uid];const SESSION_TTL=8*60*60*1000;return!!(s&&s.sessionId&&(Date.now()-(s.at||0))<SESSION_TTL);}
 
+function nowText(){
+  const d=new Date(Date.now()+9*3600*1000);
+  const y=d.getUTCFullYear(),mo=String(d.getUTCMonth()+1).padStart(2,"0"),da=String(d.getUTCDate()).padStart(2,"0");
+  const days=["일","월","화","수","목","금","토"];
+  const dow=days[d.getUTCDay()];
+  let h=d.getUTCHours();const ampm=h<12?"오전":"오후";h=h%12;if(h===0)h=12;
+  const mi=String(d.getUTCMinutes()).padStart(2,"0");
+  return `${y}-${mo}-${da} ${dow}요일 ${ampm} ${String(h).padStart(2,"0")}:${mi}`;
+}
 function hdr(){
   return `<div class="header">
   <img class="header-logo" src="${LOGO}" alt="TS">
@@ -309,7 +319,8 @@ function hdr(){
       <button class="btn" onclick="logout()" style="padding:6px 12px;font-size:0.79em">로그아웃</button>
     </div>
   </div>
-</div>`;}
+</div>
+<div id="now-bar" style="text-align:center;font-size:2.6em;font-weight:700;color:var(--text-main);padding:14px 0 6px">${nowText()}</div>`;}
 
 function render(){
   if(!sess){renderLogin();return;}
