@@ -227,6 +227,7 @@ const DEF_USERS={
 };
 let users={},orders={},sessions={};
 let sess=null,tab="dash",fSt="all",sq="",lStep="select",lTarget=null,pinBuf="";
+const openNoteKeys=new Set();
 let fontSize=localStorage.getItem("fontSize")||"medium";
 let theme=localStorage.getItem("theme")||"light";
 applyFont(fontSize);
@@ -259,7 +260,18 @@ const stC={done:"b-done",delay:"b-delay",new:"b-new",ongoing:"b-ongoing"};
 function curStep(o){if(!o.steps)return"시작 전";const i=o.steps.findIndex(s=>s===1);if(i>=0)return STEPS[i];const j=o.steps.lastIndexOf(2);if(j===STEPS.length-1)return"출하 완료";if(j>=0)return STEPS[j+1]+" 대기";return"시작 전";}
 const mySessionId="sess_"+Math.random().toString(36).slice(2);
 let sessRestoreTried=false;
-onValue(ref(db,"sessions"),snap=>{sessions=snap.val()||{};});
+onValue(ref(db,"sessions"),snap=>{
+  const newSessions=snap.val()||{};
+  if(sess&&sess.role==="worker"&&sessions[sess.id]&&sessions[sess.id].sessionId===mySessionId&&!newSessions[sess.id]){
+    sessions=newSessions;
+    localStorage.removeItem("loginId");
+    localStorage.removeItem("activeTab");
+    location.reload();
+    return;
+  }
+  sessions=newSessions;
+  render();
+});
 onValue(ref(db,"users"),snap=>{
   const val=snap.val();
   if(!val){set(ref(db,"users"),DEF_USERS);users={...DEF_USERS};}else users=val;
@@ -330,6 +342,7 @@ function hdr(){
 </div>
 <div id="now-bar">${nowCardHTML()}</div>`;}
 
+let openDetailId=null;
 function render(){
   if(!sess){renderLogin();return;}
   document.getElementById("root").innerHTML=hdr()+`<div class="app"><div id="v-main"></div><div id="ov"></div></div>`;
@@ -339,6 +352,7 @@ function render(){
   else if(!isAdmin()&&tab==="dash")renderDash();
   else if(!isAdmin()&&tab==="mywork")renderWorker();
   else renderWorker();
+  if(openDetailId)openDetail(openDetailId,true);
 }
 function sTab(t){tab=t;localStorage.setItem("activeTab",t);render();}
 function logout(){if(!confirm("로그아웃 하시겠습니까?"))return;if(sess&&sess.role!=="admin")clearSession(sess.id);localStorage.removeItem("loginId");localStorage.removeItem("activeTab");sess=null;tab="dash";lStep="select";lTarget=null;pinBuf="";render();}
@@ -402,10 +416,12 @@ function renderLogin(){
   document.getElementById("root").innerHTML=`<div class="login-wrap"><div class="login-card" id="lc">${lStep==="select"?renderLSel():lStep==="pin"?renderLPin():renderLAdmin()}</div><div id="login-picker"></div></div>`;}
 
 window.showLoginPicker=function(si){
+  const isDark=document.body.classList.contains("theme-dark");
   const BC=["#1A5FA8","#2E7D32","#C62828","#5E4FA8","#C8941E","#1B8A8A","#9C7A1E"];
   const BG=["#E3EEFA","#E5F3E0","#FBE4E4","#EDE9F8","#FFF6E5","#E0F4F4","#FAF1DD"];
+  const BG_DARK=["#1c2733","#1c2a1c","#2e1c1c","#241c2e","#2c2418","#1a2b2b","#2a2618"];
   const bc=BC[si%BC.length];
-  const bg=BG[si%BG.length];
+  const bg=isDark?BG_DARK[si%BG_DARK.length]:BG[si%BG.length];
   const workers=wList().filter(w=>w.stepIdx===si);
   const picker=document.getElementById("login-picker");
   if(!picker)return;
@@ -430,7 +446,9 @@ window.showLoginPicker=function(si){
 }
 
 function renderLSel(){
+  const isDark=document.body.classList.contains("theme-dark");
   const BG=["#E3EEFA","#E5F3E0","#FBE4E4","#EDE9F8","#FFF6E5","#E0F4F4","#FAF1DD"];
+  const BG_DARK=["#1c2733","#1c2a1c","#2e1c1c","#241c2e","#2c2418","#1a2b2b","#2a2618"];
   const BC=["#1A5FA8","#2E7D32","#C62828","#5E4FA8","#C8941E","#1B8A8A","#9C7A1E"];
   const LOGIN_STEPS=[{si:0,label:"도면작업"},{si:1,label:"레이저"},{si:2,label:"절곡"},{si:3,label:"용접"},{si:5,label:"도장/도금"}];
   return `<div style="display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:1.6rem">
@@ -447,7 +465,7 @@ function renderLSel(){
   <div style="height:1px;background:var(--border);margin:10px 0"></div>
   ${LOGIN_STEPS.map(({si,label})=>{
     const bc=BC[si%BC.length];
-    const bg=BG[si%BG.length];
+    const bg=isDark?BG_DARK[si%BG_DARK.length]:BG[si%BG.length];
     const workers=wList().filter(w=>w.stepIdx===si);
     return `<div class="user-row" style="background:${bg};border-color:${bc}44;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px" onclick="showLoginPicker(${si})">
       <div style="flex:1">
@@ -590,7 +608,7 @@ function renderDash(){
     const border=st==="delay"?(isDark?"#FF8A80":"#C62828"):st==="done"?(isDark?"#3B6D11":"#9CCB8A"):`${bc}${isDark?"55":"66"}`;
     return`<div style="background:${tint};border-radius:10px;padding:10px 10px;border:1px solid ${border};cursor:pointer" onclick="openDetail('${o.id}')">
       <div style="font-size:0.95em;color:var(--text-main);margin-bottom:8px;line-height:1.3">${o.name}</div>
-      ${o.outsource?`<div style="display:flex;justify-content:center;align-items:center;height:28px;margin-bottom:8px"><span style="font-size:0.82em;font-weight:700;color:var(--purple);background:var(--purple-bg);padding:4px 18px;border-radius:8px">외주</span></div>`:`<div class="pbar" style="margin-bottom:8px;gap:1px">${STEPS.map((s,i)=>{const c2=o.steps&&o.steps[i]===2?"ps-d":o.steps&&o.steps[i]===1?(i===FREE_STEP?"ps-free":"ps-a"):"ps-p";return`<div class="ps ${c2}" title="${s}">${s}</div>`;}).join("")}</div>`}
+      ${o.outsource?`<div style="display:flex;justify-content:center;align-items:center;height:28px;margin-bottom:8px"><span style="font-size:0.82em;font-weight:700;color:var(--purple);background:var(--purple-bg);padding:4px 18px;border-radius:8px">외주</span></div>`:`<div class="pbar" style="margin-bottom:8px;gap:1px">${STEPS.map((s,i)=>{const c2=o.steps&&o.steps[i]===2?"ps-d":o.steps&&o.steps[i]===1?(i===FREE_STEP?"ps-free":"ps-a"):"ps-p";const hasNote=o.notes&&o.notes[i];return`<div class="ps ${c2}" title="${s}${hasNote?" — 📝 "+o.notes[i]:""}" style="position:relative">${s}${hasNote?'<span style="position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:var(--gold)"></span>':""}</div>`;}).join("")}</div>`}
       <div style="display:flex;justify-content:flex-end;align-items:center">
         ${shipped?`<span style="font-size:0.78em;color:var(--green)">${shipDate} 납품완료</span>`:`<span style="font-size:0.78em;color:${dueColor(d)}">납기 ${o.due} <span style="font-weight:700">${ddayText(d)}</span></span>`}
       </div>
@@ -686,13 +704,14 @@ function cardH(o){const st=gSt(o),d=dl(o.due);
       ${d<=3&&st!=="done"?`${dueBadge(d)}`:""}
     </div>
   </div>
-  ${o.outsource?`<div style="display:flex;justify-content:center;align-items:center;height:28px"><span style="font-size:0.82em;font-weight:700;color:var(--purple);background:var(--purple-bg);padding:4px 18px;border-radius:8px">외주</span></div>`:`<div class="pbar">${STEPS.map((s,i)=>{const c=o.steps&&o.steps[i]===2?"ps-d":o.steps&&o.steps[i]===1?(i===FREE_STEP?"ps-free":"ps-a"):"ps-p";return`<div class="ps ${c}" title="${s}">${s}</div>`;}).join('<span style="font-size:0.55em;color:var(--text-faint)">›</span>')}</div>`}
+  ${o.outsource?`<div style="display:flex;justify-content:center;align-items:center;height:28px"><span style="font-size:0.82em;font-weight:700;color:var(--purple);background:var(--purple-bg);padding:4px 18px;border-radius:8px">외주</span></div>`:`<div class="pbar">${STEPS.map((s,i)=>{const c=o.steps&&o.steps[i]===2?"ps-d":o.steps&&o.steps[i]===1?(i===FREE_STEP?"ps-free":"ps-a"):"ps-p";const hasNote=o.notes&&o.notes[i];return`<div class="ps ${c}" title="${s}${hasNote?" — 📝 "+o.notes[i]:""}" style="position:relative">${s}${hasNote?'<span style="position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:var(--gold)"></span>':""}</div>`;}).join('<span style="font-size:0.55em;color:var(--text-faint)">›</span>')}</div>`}
   <div style="margin-top:8px"><div class="prog-wrap"><div class="prog-fill ${pct(o)===100?"done-fill":""}" style="width:${pct(o)}%"></div></div></div>
   <div class="ometa"><span>${o.qty}개</span><span>${shipped?shipDate+" 완료":"납기 "+o.due+" "+ddayText(d)}</span><span>${curStep(o)}</span><span>${pct(o)}%</span></div>
 </div>`;}
 
 window.openDetail=(id)=>{
   const o=Object.values(orders).find(x=>x.id===id);if(!o)return;
+  openDetailId=id;
   const st=gSt(o);
   const shipped=o.steps&&o.steps[6]===2;
   let shipDate=o.due;
@@ -746,9 +765,9 @@ function renderPL(o){
     <div class="pico ${isFree&&sv===1?"free-i":ic}">${sv===2?"✓":sv===1?(isFree?"🔧":"▶"):(i+1)}</div>
     <div style="flex:1;min-width:0">
       <div class="pname">${s}</div>
-      ${sv===2?`<div class="pworker" style="color:var(--green)">완료: ${completedBy||"미확인"}</div>`:!isFree?(adminOnly?`<div class="pworker">담당: <select style="font-size:0.82em;border:none;background:transparent;font-family:inherit;color:var(--text-mute);cursor:pointer" onchange="setWk('${o.id}',${i},this.value)"><option value="미지정" ${wk==="미지정"?"selected":""}>미지정</option>${wNames().map(w=>`<option value="${w}" ${w===wk?"selected":""}>${w}</option>`).join("")}</select></div>`:`<div class="pworker">담당: ${wk}</div>`):""}
-      ${o.notes&&o.notes[i]?`<div class="pnote">📝 ${o.notes[i]}</div>`:""}
-      ${adminOnly?`<input class="ni" id="ni-${o.id}-${i}" placeholder="메모 입력..." value="${o.notes&&o.notes[i]||""}" style="display:none" oninput="saveN('${o.id}',${i},this.value)">`:""}
+      ${sv===2?`<div class="pworker" style="color:var(--green)">완료: ${completedBy||"미확인"}</div>`:!isFree?(adminOnly?`<div class="pworker">담당: <select style="font-size:0.82em;border:none;background:transparent;font-family:inherit;color:var(--text-mute);cursor:pointer" onchange="setWk('${o.id}',${i},this.value)"><option value="미지정" ${wk==="미지정"?"selected":""}>미지정</option><option value="외주" ${wk==="외주"?"selected":""}>외주</option>${wNames().map(w=>`<option value="${w}" ${w===wk?"selected":""}>${w}</option>`).join("")}</select></div>`:`<div class="pworker">담당: ${wk}</div>`):""}
+      ${o.notes&&o.notes[i]&&!openNoteKeys.has(o.id+"-"+i)?`<div class="pnote" style="cursor:pointer" onclick="togN('${o.id}',${i})">📝 ${o.notes[i]}</div>`:""}
+      ${adminOnly?`<div id="ni-wrap-${o.id}-${i}" style="display:${openNoteKeys.has(o.id+"-"+i)?"flex":"none"};gap:6px;margin-top:6px"><input class="ni" id="ni-${o.id}-${i}" placeholder="메모 입력..." value="${o.notes&&o.notes[i]||""}" onkeydown="if(event.key==='Enter')confirmN('${o.id}',${i})" style="flex:1"><button class="btn pri" style="padding:6px 12px;font-size:0.85em" onclick="confirmN('${o.id}',${i})">확인</button></div>`:""}
     </div>
     <div class="pa">
       ${sv===2?`<span style="font-size:0.88em;color:var(--green);font-weight:400">완료</span>`:sv===1?`<span style="font-size:0.88em;color:var(--blue);font-weight:400">진행중</span>`:`<span style="font-size:0.88em;color:var(--text-faint)">대기</span>`}
@@ -759,10 +778,11 @@ function renderPL(o){
 
 
 
-window.adv=(id,i)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const u={...o,steps:[...(o.steps||STEPS.map(()=>0))],history:[...(o.history||[])]};if(u.steps[i]===0){const p=u.steps.findIndex(s=>s===1);if(p>=0&&p!==i)return;u.steps[i]=1;u.history.push({t:td(),msg:`${STEPS[i]} 시작 (관리자)`});}else if(u.steps[i]===1){u.steps[i]=2;u.history.push({t:td(),msg:`${STEPS[i]} 완료 (관리자)`});const next=o.outsource&&i===0?6:i+1;if(next<STEPS.length&&u.steps[next]!==2){u.steps[next]=1;u.history.push({t:td(),msg:`${STEPS[next]} 시작`});}}saveOrder(key,u);setTimeout(()=>openDetail(id),400);}
+window.adv=(id,i)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const u={...o,steps:[...(o.steps||STEPS.map(()=>0))],history:[...(o.history||[])]};if(u.steps[i]===0){const p=u.steps.findIndex(s=>s===1);if(p>=0&&p!==i)return;u.steps[i]=1;u.history.push({t:td(),msg:`${STEPS[i]} 시작 (관리자)`});}else if(u.steps[i]===1){u.steps[i]=2;u.history.push({t:td(),msg:`${STEPS[i]} 완료 (관리자)`});const next=o.outsource&&i===0?6:i+1;if(next<STEPS.length&&u.steps[next]!==2){u.steps[next]=1;u.history.push({t:td(),msg:`${STEPS[next]} 시작`});}}saveOrder(key,u);}
 window.setWk=(id,i,v)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const u={...o,workers:[...(o.workers||STEPS.map(()=>"미지정"))]};u.workers[i]=v;saveOrder(key,u);}
 window.saveN=(id,i,v)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const notes=[...(o.notes||STEPS.map(()=>""))];notes[i]=v;saveOrder(key,{...o,notes});}
-window.togN=(id,i)=>{const inp=document.getElementById(`ni-${id}-${i}`);if(!inp)return;inp.style.display=inp.style.display==="none"?"":"none";}
+window.confirmN=(id,i)=>{const inp=document.getElementById(`ni-${id}-${i}`);const v=inp?inp.value:"";saveN(id,i,v);openNoteKeys.delete(id+"-"+i);openDetail(id);}
+window.togN=(id,i)=>{const k=id+"-"+i;if(openNoteKeys.has(k))openNoteKeys.delete(k);else openNoteKeys.add(k);openDetail(id);}
 window.delOrderUI=(id)=>{if(!confirm("삭제하시겠습니까?"))return;const key=getOrderKey(id);deleteOrder(key);closeOv();}
 
 window.openAdd=()=>{
@@ -801,19 +821,15 @@ window.subEdit=(id)=>{
 }
 
 function renderUsers(){const ws=wList();document.getElementById("v-main").innerHTML=`
-  <div class="sh"><div class="sh-title">계정 관리</div><div style="display:flex;gap:7px"><button class="btn red-btn" onclick="resetAllWorkers()">⟳ 담당자 초기화</button><button class="btn gold" onclick="openAddWk()">+ 담당자 추가</button></div></div>
+  <div class="sh"><div class="sh-title">계정 관리</div><div style="display:flex;gap:7px"><button class="btn gold" onclick="openAddWk()">+ 담당자 추가</button></div></div>
   <div class="section-card"><div class="sc-title">관리자</div><div class="user-mgmt-row"><div style="flex:1"><div style="font-size:1.05em;font-weight:400">관리자</div><div style="font-size:0.82em;color:var(--text-mute);margin-top:3px">ID: admin · 전체 권한 · 중복 로그인 허용</div></div></div></div>
   <div class="section-card"><div class="sc-title">공정 담당자 (${ws.length}명)</div>
-  ${ws.map(w=>{const on=isOnline(w.id);return`<div class="user-mgmt-row"><div style="flex:1"><div style="font-size:1.05em;font-weight:400;display:flex;align-items:center;gap:8px">${w.name}${on?` <span style="font-size:0.7em;color:var(--gold);background:var(--gold-bg);padding:2px 8px;border-radius:10px">접속중</span>`:""}</div><div style="font-size:0.82em;color:var(--text-mute);margin-top:3px">${STEPS[w.stepIdx]} 담당 · PIN: ${"●".repeat(w.pin.length)}</div></div><div style="display:flex;gap:7px"><button class="btn" onclick="openEditWk('${w.id}')" style="font-size:0.85em">✏ 수정</button><button class="btn red-btn" onclick="delWk('${w.id}')" style="font-size:0.85em">🗑</button></div></div>`;}).join("")}
+  ${ws.map(w=>{const on=isOnline(w.id);return`<div class="user-mgmt-row"><div style="flex:1"><div style="font-size:1.05em;font-weight:400;display:flex;align-items:center;gap:8px">${w.name}${on?` <span style="font-size:0.7em;color:var(--gold);background:var(--gold-bg);padding:2px 8px;border-radius:10px">접속중</span>`:""}</div><div style="font-size:0.82em;color:var(--text-mute);margin-top:3px">${STEPS[w.stepIdx]} 담당 · PIN: ${"●".repeat(w.pin.length)}</div></div><div style="display:flex;gap:7px">${on?`<button class="btn" onclick="forceLogoutWk('${w.id}')" style="font-size:0.85em">⏻ 로그아웃</button>`:""}<button class="btn" onclick="openEditWk('${w.id}')" style="font-size:0.85em">✏ 수정</button><button class="btn red-btn" onclick="delWk('${w.id}')" style="font-size:0.85em">🗑</button></div></div>`;}).join("")}
   </div>`;}
 
-window.resetAllWorkers=()=>{
-  if(!confirm("기존 담당자를 모두 삭제하고 초기 11명(김오기·안성민·박은희·코로넬·소안준·푸성·안동운·라준식·이태원·표영만·양주석)으로 다시 설정합니다. 계속하시겠습니까?"))return;
-  Object.keys(users).forEach(k=>{if(users[k].role==="worker")remove(ref(db,`users/${k}`));});
-  setTimeout(()=>{
-    Object.keys(DEF_USERS).forEach(k=>{if(DEF_USERS[k].role==="worker")saveUser(k,DEF_USERS[k]);});
-    alert("담당자가 초기화되었습니다.");
-  },300);
+window.forceLogoutWk=(uid)=>{
+  if(!confirm("이 담당자를 강제 로그아웃 하시겠습니까?"))return;
+  clearSession(uid);
 }
 
 window.openAddWk=()=>{showOv(`<div class="modal"><div class="mtitle">담당자 추가</div><div class="fg"><label class="fl">이름</label><input class="fi" id="nw-nm" placeholder="담당자 이름"></div><div class="fg"><label class="fl">담당 공정</label><select class="fi" id="nw-st">${STEPS.map((s,i)=>`<option value="${i}">${s}</option>`).join("")}</select></div><div class="fg"><label class="fl">PIN (숫자 4자리)</label><input class="fi" id="nw-pi" type="number" placeholder="예: 1234"></div><div class="err-msg" id="nw-e"></div><div class="mfoot"><button class="btn" onclick="closeOv()">취소</button><button class="btn gold" onclick="subAddWk()">+ 추가</button></div></div>`);}
@@ -823,7 +839,7 @@ window.subEditWk=(uid)=>{const w=users[uid];if(!w)return;const nm=document.getEl
 window.delWk=(uid)=>{if(!confirm("삭제하시겠습니까?"))return;clearSession(uid);deleteUser(uid);}
 
 function showOv(html){const a=document.getElementById("ov");if(a)a.innerHTML=`<div class="overlay" onclick="if(event.target===this)closeOv()"><div>${html}</div></div>`;}
-window.closeOv=()=>{const a=document.getElementById("ov");if(a)a.innerHTML="";}
+window.closeOv=()=>{openDetailId=null;const a=document.getElementById("ov");if(a)a.innerHTML="";}
 window.renderList=renderList;window.renderUsers=renderUsers;window.renderSettings=renderSettings;
 </script>
 </body>
