@@ -227,8 +227,11 @@ const DEF_USERS={
   w11:{id:"w11",name:"양주석",role:"worker",pin:"1234",stepIdx:5},
 };
 let users={},orders={},sessions={};
-let sess=null,tab="dash",fSt="all",sq="",lStep="select",lTarget=null,pinBuf="";
+let sess=null,tab="dash",fSt="all",sq="",lStep="select",lTarget=null,pinBuf="",dashView="list";
 const openNoteKeys=new Set();
+let calMonthOffset=0;
+window.setDashView=(v)=>{dashView=v;calMonthOffset=0;render();}
+window.shiftCalMonth=(d)=>{calMonthOffset+=d;render();}
 let fontSize=localStorage.getItem("fontSize")||"medium";
 let theme=localStorage.getItem("theme")||"light";
 applyFont(fontSize);
@@ -585,6 +588,60 @@ window.wSendBack=(oid,si)=>{
 
 window.wComplete=(oid,si)=>{const key=getOrderKey(oid);const o=orders[key];if(!o||o.steps[si]!==1)return;const u={...o,steps:[...o.steps],history:[...(o.history||[])],completedWorkers:{...(o.completedWorkers||{})}};u.steps[si]=2;u.completedWorkers[si]=wName();u.history.push({t:td(),msg:`${STEPS[si]} 완료 (${wName()})`});if(si+1<STEPS.length){u.steps[si+1]=1;u.history.push({t:td(),msg:`${STEPS[si+1]} 시작`});}saveOrder(key,u);}
 
+function renderCalendar(oList){
+  const isDark=document.body.classList.contains("theme-dark");
+  const now=new Date(Date.now()+9*3600*1000);
+  let y=now.getUTCFullYear(),mo=now.getUTCMonth()+calMonthOffset;
+  y+=Math.floor(mo/12);mo=((mo%12)+12)%12;
+  const firstDay=new Date(Date.UTC(y,mo,1));
+  const startWeekday=firstDay.getUTCDay();
+  const daysInMonth=new Date(Date.UTC(y,mo+1,0)).getUTCDate();
+  const todayStr=td();
+  const byDate={};
+  oList.forEach(o=>{
+    if(!o.due)return;
+    const d=o.due;
+    if(!byDate[d])byDate[d]=[];
+    byDate[d].push(o);
+  });
+  const monthLabel=`${y}년 ${mo+1}월`;
+  const weekNames=["일","월","화","수","목","금","토"];
+  const cells=[];
+  for(let i=0;i<startWeekday;i++)cells.push(null);
+  for(let day=1;day<=daysInMonth;day++)cells.push(day);
+  while(cells.length%7!==0)cells.push(null);
+  const rows=[];
+  for(let i=0;i<cells.length;i+=7)rows.push(cells.slice(i,i+7));
+  const cellHtml=(day,wd)=>{
+    if(day===null)return `<div style="min-height:84px;background:var(--bg-page);border-radius:8px"></div>`;
+    const dateStr=`${y}-${String(mo+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    const isToday=dateStr===todayStr;
+    const items=byDate[dateStr]||[];
+    const wdColor=wd===0?(isDark?"#FF8A80":"#C62828"):wd===6?(isDark?"#7EC8E3":"#1A5FA8"):"var(--text-main)";
+    return `<div style="min-height:84px;background:${isToday?"var(--gold-bg)":"var(--bg-card2)"};border:1px solid ${isToday?"var(--gold)":"var(--border)"};border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:3px;overflow:hidden">
+      <div style="font-size:0.78em;font-weight:700;color:${wdColor}">${day}</div>
+      ${items.slice(0,3).map(o=>{
+        const st=gSt(o);
+        const dotColor=st==="delay"?(isDark?"#FF8A80":"#C62828"):st==="done"?(isDark?"#6FCF6F":"#2E7D32"):o.outsource?(isDark?"#B0A8FF":"#5E4FA8"):(isDark?"#7EC8E3":"#1A5FA8");
+        return `<div onclick="openDetail('${o.id}')" style="cursor:pointer;font-size:0.7em;background:${dotColor}22;color:${dotColor};border-radius:4px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${o.client} / ${o.name}">${o.client}</div>`;
+      }).join("")}
+      ${items.length>3?`<div style="font-size:0.68em;color:var(--text-mute)">+${items.length-3}건</div>`:""}
+    </div>`;
+  };
+  return `
+  <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:14px">
+    <button class="btn" style="padding:6px 12px" onclick="shiftCalMonth(-1)">‹</button>
+    <div style="font-size:1.1em;font-weight:700;color:var(--text-main);min-width:120px;text-align:center">${monthLabel}</div>
+    <button class="btn" style="padding:6px 12px" onclick="shiftCalMonth(1)">›</button>
+    ${calMonthOffset!==0?`<button class="btn" style="padding:6px 12px;font-size:0.82em" onclick="calMonthOffset=0;render()">오늘</button>`:""}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px">
+    ${weekNames.map((w,i)=>`<div style="text-align:center;font-size:0.78em;color:${i===0?(isDark?"#FF8A80":"#C62828"):i===6?(isDark?"#7EC8E3":"#1A5FA8"):"var(--text-mute)"};padding:4px 0">${w}</div>`).join("")}
+  </div>
+  ${rows.map(row=>`<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px">${row.map((day,i)=>cellHtml(day,i)).join("")}</div>`).join("")}
+  `;
+}
+
 function renderDash(){
   const el=document.getElementById("v-main"),oList=Object.values(orders),total=oList.length;
   const done=oList.filter(o=>gSt(o)==="done").length,delay=oList.filter(o=>gSt(o)==="delay").length,ongoing=oList.filter(o=>gSt(o)==="ongoing").length;
@@ -645,10 +702,19 @@ function renderDash(){
     <div class="scard"><div class="slabel">지연</div><div class="sval red">${delay}</div></div>
   </div>
   ${near.length?`<div class="alert-bar" style="cursor:pointer;flex-direction:column;align-items:flex-start;gap:6px" onclick="showNearModal()"><div>🔔 오늘 납기 — 탭하여 확인</div>${near.map(o=>`<div style="font-size:0.9em;padding-left:4px">· <strong>${o.client}</strong> / ${o.name} <span style="color:var(--text-mute);font-size:0.85em">${o.due}</span></div>`).join("")}</div>`:""}
-  <div class="sh" style="margin-bottom:14px"><div class="sh-title">🏢 업체별 수주 현황</div>${(isAdmin()||canRegister())?`<button class="btn gold" onclick="openAdd()">+ 수주 등록</button>`:""}</div>
-  ${clientSection(ongoingMap,1)}
+  <div class="sh" style="margin-bottom:14px">
+    <div class="sh-title">🏢 업체별 수주 현황</div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <div style="display:flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden">
+        <button class="btn" style="border:none;border-radius:0;padding:6px 12px;font-size:0.82em;background:${dashView==="list"?"var(--gold)":"transparent"};color:${dashView==="list"?"#1a1200":"var(--text-main)"}" onclick="setDashView('list')">목록</button>
+        <button class="btn" style="border:none;border-radius:0;padding:6px 12px;font-size:0.82em;background:${dashView==="calendar"?"var(--gold)":"transparent"};color:${dashView==="calendar"?"#1a1200":"var(--text-main)"}" onclick="setDashView('calendar')">📅 달력</button>
+      </div>
+      ${(isAdmin()||canRegister())?`<button class="btn gold" onclick="openAdd()">+ 수주 등록</button>`:""}
+    </div>
+  </div>
+  ${dashView==="calendar"?renderCalendar(oList):`${clientSection(ongoingMap,1)}
   ${outsourceList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title">🔧 외주 현황</div>${isAdmin()?`<button class="btn" onclick="cleanupOutsourceSteps()" style="font-size:0.82em">⟳ 공정 정리</button>`:""}</div>${clientSection(groupByClient(outsourceList),1)}`:""}
-  ${doneList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title" style="color:var(--green)">📦 납품 완료 (${doneList.length}건)</div></div>${clientSection(doneMap,0.65)}`:""}
+  ${doneList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title" style="color:var(--green)">📦 납품 완료 (${doneList.length}건)</div></div>${clientSection(doneMap,0.65)}`:""}`}
   `;
 }
 
