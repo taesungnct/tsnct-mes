@@ -531,15 +531,17 @@ function renderWorker(){
   const el=document.getElementById("v-main"),si=wIdx(),oList=Object.values(orders);
   const SHIP_STEP=6;
   const canShip=si===5;
-  const myActive=oList.filter(o=>o.steps&&o.steps[si]===1&&(si!==0||(o.workers&&o.workers[si]===wName())));
-  const myDone=oList.filter(o=>{
+  const participatesInOutsource=si===0||si===5;
+  const visibleList=oList.filter(o=>!o.outsource||participatesInOutsource);
+  const myActive=visibleList.filter(o=>o.steps&&o.steps[si]===1&&(si!==0||(o.workers&&o.workers[si]===wName())));
+  const myDone=visibleList.filter(o=>{
     if(!(o.steps&&o.steps[si]===2))return false;
     if(si!==0)return true;
     const cw=o.completedWorkers&&o.completedWorkers[si];
     if(cw)return cw===wName();
     return o.workers&&o.workers[si]===wName();
   });
-  const freeActive=oList.filter(o=>o.steps&&o.steps[FREE_STEP]===1);
+  const freeActive=visibleList.filter(o=>o.steps&&o.steps[FREE_STEP]===1&&!o.outsource);
   const shipActive=canShip?oList.filter(o=>o.steps&&o.steps[SHIP_STEP]===1):[];
   const near=myActive.filter(o=>dl(o.due)>=0&&dl(o.due)<=3);
   el.innerHTML=`
@@ -645,7 +647,7 @@ function renderDash(){
   ${near.length?`<div class="alert-bar" style="cursor:pointer;flex-direction:column;align-items:flex-start;gap:6px" onclick="showNearModal()"><div>🔔 오늘 납기 — 탭하여 확인</div>${near.map(o=>`<div style="font-size:0.9em;padding-left:4px">· <strong>${o.client}</strong> / ${o.name} <span style="color:var(--text-mute);font-size:0.85em">${o.due}</span></div>`).join("")}</div>`:""}
   <div class="sh" style="margin-bottom:14px"><div class="sh-title">🏢 업체별 수주 현황</div>${(isAdmin()||canRegister())?`<button class="btn gold" onclick="openAdd()">+ 수주 등록</button>`:""}</div>
   ${clientSection(ongoingMap,1)}
-  ${outsourceList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title">🔧 외주 현황</div></div>${clientSection(groupByClient(outsourceList),1)}`:""}
+  ${outsourceList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title">🔧 외주 현황</div>${isAdmin()?`<button class="btn" onclick="cleanupOutsourceSteps()" style="font-size:0.82em">⟳ 공정 정리</button>`:""}</div>${clientSection(groupByClient(outsourceList),1)}`:""}
   ${doneList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title" style="color:var(--green)">📦 납품 완료 (${doneList.length}건)</div></div>${clientSection(doneMap,0.65)}`:""}
   `;
 }
@@ -862,6 +864,19 @@ function renderUsers(){const ws=wList();document.getElementById("v-main").innerH
 window.forceLogoutWk=(uid)=>{
   if(!confirm("이 담당자를 강제 로그아웃 하시겠습니까?"))return;
   clearSession(uid);
+}
+
+window.cleanupOutsourceSteps=()=>{
+  const targets=Object.entries(orders).filter(([k,o])=>o.outsource&&o.steps&&o.steps.slice(1,6).some(s=>s!==0));
+  if(targets.length===0){alert("정리할 외주 수주가 없습니다.");return;}
+  if(!confirm(`외주 수주 ${targets.length}건의 중간 공정(레이저~도장/도금) 기록을 초기화합니다. 도면작업·출하 상태는 유지됩니다. 계속하시겠습니까?`))return;
+  targets.forEach(([key,o])=>{
+    const steps=[...o.steps];
+    for(let k=1;k<6;k++)steps[k]=0;
+    if(steps[0]===2&&steps[6]!==2)steps[6]=1;
+    saveOrder(key,{...o,steps});
+  });
+  alert("정리가 완료되었습니다.");
 }
 
 window.openAddWk=()=>{showOv(`<div class="modal"><div class="mtitle">담당자 추가</div><div class="fg"><label class="fl">이름</label><input class="fi" id="nw-nm" placeholder="담당자 이름"></div><div class="fg"><label class="fl">담당 공정</label><select class="fi" id="nw-st">${STEPS.map((s,i)=>`<option value="${i}">${s}</option>`).join("")}</select></div><div class="fg"><label class="fl">PIN (숫자 4자리)</label><input class="fi" id="nw-pi" type="number" placeholder="예: 1234"></div><div class="err-msg" id="nw-e"></div><div class="mfoot"><button class="btn" onclick="closeOv()">취소</button><button class="btn gold" onclick="subAddWk()">+ 추가</button></div></div>`);}
