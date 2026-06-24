@@ -230,6 +230,8 @@ let users={},orders={},sessions={};
 let sess=null,tab="dash",fSt="all",sq="",lStep="select",lTarget=null,pinBuf="",dashView="list";
 const openNoteKeys=new Set();
 let calMonthOffset=0;
+let doneCollapsed=true;
+window.toggleDoneSection=()=>{doneCollapsed=!doneCollapsed;render();}
 window.setDashView=(v)=>{dashView=v;calMonthOffset=0;render();}
 window.shiftCalMonth=(d)=>{calMonthOffset+=d;render();}
 let fontSize=localStorage.getItem("fontSize")||"medium";
@@ -714,7 +716,7 @@ function renderDash(){
   </div>
   ${dashView==="calendar"?renderCalendar(oList):`${clientSection(ongoingMap,1)}
   ${outsourceList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title">🔧 외주 현황</div>${isAdmin()?`<button class="btn" onclick="cleanupOutsourceSteps()" style="font-size:0.82em">⟳ 공정 정리</button>`:""}</div>${clientSection(groupByClient(outsourceList),1)}`:""}
-  ${doneList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title" style="color:var(--green)">📦 납품 완료 (${doneList.length}건)</div></div>${clientSection(doneMap,0.65)}`:""}`}
+  ${doneList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px;cursor:pointer" onclick="toggleDoneSection()"><div class="sh-title" style="color:var(--green)">📦 납품 완료 (${doneList.length}건) <span style="font-size:0.75em">${doneCollapsed?"▸":"▾"}</span></div></div>${doneCollapsed?"":clientSection(doneMap,0.65)}`:""}`}
   `;
 }
 
