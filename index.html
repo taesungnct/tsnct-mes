@@ -661,11 +661,13 @@ function renderDash(){
 
   const ongoingList=oList.filter(o=>gSt(o)!=="done"&&!o.outsource);
   const doneList=oList.filter(o=>gSt(o)==="done"&&!o.outsource);
-  const outsourceList=oList.filter(o=>o.outsource);
+  const outsourceList=oList.filter(o=>o.outsource&&gSt(o)!=="done");
+  const outsourceDoneList=oList.filter(o=>o.outsource&&gSt(o)==="done");
 
   const groupByClient=(list)=>{const m={};list.forEach(o=>{const c=o.client||"미정";if(!m[c])m[c]=[];m[c].push(o);});return m;};
   const ongoingMap=groupByClient(ongoingList);
-  const doneMap=groupByClient(doneList);
+  const doneMap=groupByClient([...doneList,...outsourceDoneList]);
+  const allDoneCount=doneList.length+outsourceDoneList.length;
 
   const orderCard=(o,bc)=>{
     const st=gSt(o),d=dl(o.due);
@@ -721,7 +723,7 @@ function renderDash(){
   </div>
   ${dashView==="calendar"?renderCalendar(oList):`${clientSection(ongoingMap,1)}
   ${outsourceList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title">🔧 외주 현황</div>${isAdmin()?`<button class="btn" onclick="cleanupOutsourceSteps()" style="font-size:0.82em">⟳ 공정 정리</button>`:""}</div>${clientSection(groupByClient(outsourceList),1)}`:""}
-  ${doneList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px;cursor:pointer" onclick="toggleDoneSection()"><div class="sh-title" style="color:var(--green)">📦 납품 완료 (${doneList.length}건) <span style="font-size:0.75em">${doneCollapsed?"▸":"▾"}</span></div></div>${doneCollapsed?"":clientSection(doneMap,0.65)}`:""}`}
+  ${allDoneCount?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px;cursor:pointer" onclick="toggleDoneSection()"><div class="sh-title" style="color:var(--green)">📦 납품 완료 (${allDoneCount}건) <span style="font-size:0.75em">${doneCollapsed?"▸":"▾"}</span></div></div>${doneCollapsed?"":clientSection(doneMap,0.65)}`:""}`}
   `;
 }
 
