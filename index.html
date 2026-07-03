@@ -251,7 +251,7 @@ function dueColor(d){
   if(d<=2)return dark?"#F5D742":"#B8860B";
   return dark?"#999":"#999";
 }
-function pct(o){return o.steps?Math.round(o.steps.filter(s=>s===2).length/STEPS.length*100):0;}
+function pct(o){if(o.outsource){if(o.steps&&o.steps[0]===2&&o.steps[6]===2)return 100;if(o.steps&&o.steps[0]===2)return 50;return 0;}return o.steps?Math.round(o.steps.filter(s=>s===2).length/STEPS.length*100):0;}
 function nextId(){const nums=Object.values(orders).map(o=>{const m=o.id&&o.id.match(/\d+$/);return m?parseInt(m[0]):0;});return`${new Date().getFullYear()}-${String((nums.length?Math.max(...nums):80)+1).padStart(3,"0")}`;}
 function wList(){return Object.values(users).filter(u=>u.role==="worker");}
 function wNames(){return wList().map(u=>u.name);}
