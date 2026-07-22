@@ -804,7 +804,7 @@ window.openDetail=(id)=>{
   }
   showOv(`<div class="modal">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem">
-      <div><div style="font-size:1.15em;font-weight:400;color:var(--gold)">${o.id}</div><div style="font-size:0.9em;color:var(--text-sub);margin-top:3px">${o.name}</div><div style="font-size:0.82em;color:var(--text-mute);margin-top:3px">${o.client} · ${o.qty}개</div></div>
+      <div><div style="font-size:1.15em;font-weight:400;color:var(--gold)">${o.id}</div><div style="font-size:0.9em;color:var(--text-sub);margin-top:3px">${o.name}</div><div style="font-size:0.82em;color:var(--text-mute);margin-top:3px">${o.client}</div></div>
       <button class="btn" onclick="closeOv()" style="padding:5px 11px;font-size:1em">✕</button>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
@@ -915,7 +915,7 @@ window.subAdd=()=>{const cl=document.getElementById("ai-cl").value.trim(),nm=doc
 window.openEdit=(id)=>{const o=Object.values(orders).find(x=>x.id===id);if(!o)return;closeOv();const curWk=(o.workers&&o.workers[0])||"미지정";setTimeout(()=>showOv(`<div class="modal">
   <div class="mtitle">수주 수정 — ${o.id}</div>
   <div class="fr"><div class="fg"><label class="fl">거래처</label><input class="fi" id="ei-cl" value="${o.client||""}"></div><div class="fg"><label class="fl">품명</label><input class="fi" id="ei-nm" value="${o.name||""}"></div></div>
-  <div class="fr"><div class="fg"><label class="fl">수량</label><input class="fi" id="ei-qt" type="number" value="${o.qty||1}"></div><div class="fg"><label class="fl">납기일</label><input class="fi" id="ei-du" type="date" value="${o.due||""}"></div></div>
+  <div class="fr"><div class="fg"><label class="fl">납기일</label><input class="fi" id="ei-du" type="date" value="${o.due||""}"></div></div>
   <div class="fr"><div class="fg"><label class="fl">후가공</label><input class="fi" id="ei-po" value="${o.post||""}"></div><div class="fg"><label class="fl">도장/도금</label><input class="fi" id="ei-co" value="${o.coat||""}"></div></div>
   <div class="fg"><label class="fl">도면작업 담당자</label><select class="fi" id="ei-wk"><option value="미지정" ${curWk==="미지정"?"selected":""}>미지정</option>${wList().filter(w=>w.stepIdx===0).map(w=>`<option ${curWk===w.name?"selected":""}>${w.name}</option>`).join("")}</select></div>
   <div class="mfoot"><button class="btn" onclick="closeOv()">취소</button><button class="btn gold" onclick="subEdit('${o.id}')">✓ 저장</button></div>
@@ -925,7 +925,7 @@ window.subEdit=(id)=>{
   const key=getOrderKey(id);const o=orders[key];if(!o)return;
   const workers=[...(o.workers||STEPS.map(()=>"미지정"))];
   workers[0]=document.getElementById("ei-wk").value;
-  saveOrder(key,{...o,client:document.getElementById("ei-cl").value.trim()||o.client,name:document.getElementById("ei-nm").value.trim()||o.name,qty:parseInt(document.getElementById("ei-qt").value)||o.qty,due:document.getElementById("ei-du").value||o.due,post:document.getElementById("ei-po").value.trim(),coat:document.getElementById("ei-co").value.trim(),workers});
+  saveOrder(key,{...o,client:document.getElementById("ei-cl").value.trim()||o.client,name:document.getElementById("ei-nm").value.trim()||o.name,due:document.getElementById("ei-du").value||o.due,post:document.getElementById("ei-po").value.trim(),coat:document.getElementById("ei-co").value.trim(),workers});
   closeOv();
 }
 
