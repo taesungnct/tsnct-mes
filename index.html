@@ -762,13 +762,13 @@ window.showNearModal=()=>{
     </div>
     ${near.map(o=>{const d=dl(o.due);return`
     <div style="background:var(--bg-card);border:1px solid var(--red);border-radius:12px;padding:13px 15px;margin-bottom:10px;cursor:pointer" onclick="closeOv();setTimeout(()=>openDetail('${o.id}'),100)">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px">
+        <div style="min-width:0">
           
           <div style="font-size:0.88em;color:var(--text-sub);margin-top:2px">${o.name}</div>
           <div style="font-size:0.82em;color:var(--text-mute);margin-top:2px">${o.client}</div>
         </div>
-        ${dueBadge(d)}
+        <div style="flex-shrink:0;white-space:nowrap">${dueBadge(d)}</div>
       </div>
       <div style="font-size:0.82em;color:var(--text-mute)">현재 공정: ${curStep(o)}</div>
       <div style="font-size:0.79em;color:var(--text-faint);margin-top:4px">탭하여 상세 보기</div>
