@@ -916,7 +916,6 @@ window.openEdit=(id)=>{const o=Object.values(orders).find(x=>x.id===id);if(!o)re
   <div class="mtitle">수주 수정 — ${o.id}</div>
   <div class="fr"><div class="fg"><label class="fl">거래처</label><input class="fi" id="ei-cl" value="${o.client||""}"></div><div class="fg"><label class="fl">품명</label><input class="fi" id="ei-nm" value="${o.name||""}"></div></div>
   <div class="fr"><div class="fg"><label class="fl">납기일</label><input class="fi" id="ei-du" type="date" value="${o.due||""}"></div></div>
-  <div class="fr"><div class="fg"><label class="fl">후가공</label><input class="fi" id="ei-po" value="${o.post||""}"></div><div class="fg"><label class="fl">도장/도금</label><input class="fi" id="ei-co" value="${o.coat||""}"></div></div>
   <div class="fg"><label class="fl">도면작업 담당자</label><select class="fi" id="ei-wk"><option value="미지정" ${curWk==="미지정"?"selected":""}>미지정</option>${wList().filter(w=>w.stepIdx===0).map(w=>`<option ${curWk===w.name?"selected":""}>${w.name}</option>`).join("")}</select></div>
   <div class="mfoot"><button class="btn" onclick="closeOv()">취소</button><button class="btn gold" onclick="subEdit('${o.id}')">✓ 저장</button></div>
 </div>`),50);}
@@ -925,7 +924,7 @@ window.subEdit=(id)=>{
   const key=getOrderKey(id);const o=orders[key];if(!o)return;
   const workers=[...(o.workers||STEPS.map(()=>"미지정"))];
   workers[0]=document.getElementById("ei-wk").value;
-  saveOrder(key,{...o,client:document.getElementById("ei-cl").value.trim()||o.client,name:document.getElementById("ei-nm").value.trim()||o.name,due:document.getElementById("ei-du").value||o.due,post:document.getElementById("ei-po").value.trim(),coat:document.getElementById("ei-co").value.trim(),workers});
+  saveOrder(key,{...o,client:document.getElementById("ei-cl").value.trim()||o.client,name:document.getElementById("ei-nm").value.trim()||o.name,due:document.getElementById("ei-du").value||o.due,workers});
   closeOv();
 }
 
