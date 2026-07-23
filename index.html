@@ -655,19 +655,21 @@ function renderCalendar(oList){
   const rows=[];
   for(let i=0;i<cells.length;i+=7)rows.push(cells.slice(i,i+7));
   const cellHtml=(day,wd)=>{
-    if(day===null)return `<div style="min-height:84px;background:var(--bg-page);border-radius:8px"></div>`;
+    if(day===null)return `<div style="min-height:110px;background:var(--bg-page);border-radius:8px"></div>`;
     const dateStr=`${y}-${String(mo+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
     const isToday=dateStr===todayStr;
     const items=byDate[dateStr]||[];
     const wdColor=wd===0?(isDark?"#FF8A80":"#C62828"):wd===6?(isDark?"#7EC8E3":"#1A5FA8"):"var(--text-main)";
-    return `<div style="min-height:84px;background:${isToday?"var(--gold-bg)":"var(--bg-card2)"};border:1px solid ${isToday?"var(--gold)":"var(--border)"};border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:3px;overflow:hidden">
+    return `<div style="min-height:110px;background:${isToday?"var(--gold-bg)":"var(--bg-card2)"};border:1px solid ${isToday?"var(--gold)":"var(--border)"};border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:3px;overflow:hidden">
       <div style="font-size:0.78em;font-weight:700;color:${wdColor}">${day}</div>
-      ${items.slice(0,3).map(o=>{
-        const st=gSt(o);
-        const dotColor=st==="delay"?(isDark?"#FF8A80":"#C62828"):st==="done"?(isDark?"#6FCF6F":"#2E7D32"):o.outsource?(isDark?"#B0A8FF":"#5E4FA8"):(isDark?"#7EC8E3":"#1A5FA8");
-        return `<div onclick="openDetail('${o.id}')" style="cursor:pointer;font-size:0.7em;background:${dotColor}22;color:${dotColor};border-radius:4px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${o.client} / ${o.name}">${o.client}</div>`;
-      }).join("")}
-      ${items.length>3?`<div style="font-size:0.68em;color:var(--text-mute)">+${items.length-3}건</div>`:""}
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">
+        ${items.slice(0,9).map(o=>{
+          const st=gSt(o);
+          const dotColor=st==="delay"?(isDark?"#FF8A80":"#C62828"):st==="done"?(isDark?"#6FCF6F":"#2E7D32"):o.outsource?(isDark?"#B0A8FF":"#5E4FA8"):(isDark?"#7EC8E3":"#1A5FA8");
+          return `<div onclick="openDetail('${o.id}')" style="cursor:pointer;font-size:0.62em;background:${dotColor}22;color:${dotColor};border-radius:3px;padding:2px 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center" title="${o.client} / ${o.name}">${o.client}</div>`;
+        }).join("")}
+      </div>
+      ${items.length>9?`<div style="font-size:0.68em;color:var(--text-mute)">+${items.length-9}건</div>`:""}
     </div>`;
   };
   return `
