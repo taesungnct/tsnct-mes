@@ -180,20 +180,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .client-grid{display:flex;flex-direction:column;gap:8px}
-.client-cards-col{display:grid;grid-template-columns:repeat(1,1fr);gap:14px;align-items:start}
-.client-card{margin-bottom:0 !important}
-@media(min-width:900px){
-  .client-cards-col{grid-template-columns:repeat(3,1fr)}
-}
-@media(min-width:1400px){
-  .client-cards-col{grid-template-columns:repeat(4,1fr)}
-}
-@media(max-width:899px) and (min-width:600px){
-  .client-cards-col{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:599px){
-  .client-cards-col{grid-template-columns:repeat(1,1fr)}
-}
+.client-cards-col{position:relative}
+.client-card{margin-bottom:14px;transition:top 0.15s ease,left 0.15s ease}
 
 @media(max-width:600px){
   .header{padding:8px 12px;gap:6px}
@@ -696,6 +684,44 @@ function renderCalendar(oList){
   `;
 }
 
+function masonryCols(){
+  const w=window.innerWidth;
+  if(w>=1400)return 4;
+  if(w>=900)return 3;
+  if(w>=600)return 2;
+  return 1;
+}
+function layoutMasonry(){
+  document.querySelectorAll(".client-cards-col").forEach(container=>{
+    const cards=Array.from(container.children);
+    if(!cards.length)return;
+    const cols=masonryCols();
+    if(cols<=1){
+      container.style.height="";
+      cards.forEach(card=>{card.style.position="";card.style.width="";card.style.left="";card.style.top="";});
+      return;
+    }
+    const gap=14;
+    const cw=container.clientWidth;
+    const cardW=(cw-gap*(cols-1))/cols;
+    const colH=new Array(cols).fill(0);
+    cards.forEach(card=>{
+      let idx=0;
+      for(let i=1;i<cols;i++)if(colH[i]<colH[idx])idx=i;
+      card.style.position="absolute";
+      card.style.width=cardW+"px";
+      card.style.left=(idx*(cardW+gap))+"px";
+      card.style.top=colH[idx]+"px";
+      colH[idx]+=card.offsetHeight+gap;
+    });
+    container.style.height=(Math.max(...colH)-gap)+"px";
+  });
+}
+let masonryResizeTimer=null;
+window.addEventListener("resize",()=>{
+  clearTimeout(masonryResizeTimer);
+  masonryResizeTimer=setTimeout(layoutMasonry,120);
+});
 function renderDash(){
   const el=document.getElementById("v-main"),oList=Object.values(orders),total=oList.length;
   const done=oList.filter(o=>gSt(o)==="done").length,delay=oList.filter(o=>gSt(o)==="delay").length,ongoing=oList.filter(o=>gSt(o)==="ongoing").length;
@@ -779,6 +805,7 @@ function renderDash(){
   ${outsourceList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title">🔧 외주 현황</div>${isAdmin()?`<button class="btn" onclick="cleanupOutsourceSteps()" style="font-size:0.82em">⟳ 공정 정리</button>`:""}</div>${clientSection(groupByClient(outsourceList),1)}`:""}
   ${allDoneCount?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px;cursor:pointer" onclick="toggleDoneSection()"><div class="sh-title" style="color:var(--green)">📦 납품 완료 (${allDoneCount}건) <span style="font-size:0.75em">${doneCollapsed?"▸":"▾"}</span></div></div>${doneCollapsed?"":clientSection(doneMap,0.65)}`:""}`}
   `;
+  requestAnimationFrame(layoutMasonry);
 }
 
 window.showNearModal=()=>{
