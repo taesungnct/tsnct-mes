@@ -57,6 +57,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .b-delay{background:var(--red-bg);color:var(--red)}
 .b-new{background:var(--purple-bg);color:var(--purple)}
 .app{max-width:860px;margin:0 auto;padding:1rem}
+.app-width{max-width:860px;margin:12px auto 4px;padding:0 1rem;box-sizing:border-box}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:1.25rem}
 @media(min-width:500px){.stats{grid-template-columns:repeat(4,1fr)}}
 .scard{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
@@ -76,6 +77,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .ocard{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:15px 17px;margin-bottom:10px;cursor:pointer;touch-action:manipulation;box-shadow:var(--shadow)}
 .ocard:active{opacity:0.8}
 .ocard.delay-card{border-left:4px solid var(--red)}
+.dash-order-card{cursor:pointer;touch-action:manipulation;box-shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.06);transition:transform 0.14s ease,box-shadow 0.14s ease;will-change:transform}
+.dash-order-card:hover{transform:translateY(-4px);box-shadow:0 10px 18px rgba(0,0,0,0.18),0 4px 8px rgba(0,0,0,0.12)}
+.dash-order-card:active{transform:translateY(-1px);opacity:0.9}
+.theme-dark .dash-order-card{box-shadow:0 1px 3px rgba(0,0,0,0.3),0 1px 2px rgba(0,0,0,0.25)}
+.theme-dark .dash-order-card:hover{box-shadow:0 12px 22px rgba(0,0,0,0.5),0 4px 10px rgba(0,0,0,0.4)}
+.client-card{box-shadow:0 2px 6px rgba(0,0,0,0.10),0 1px 2px rgba(0,0,0,0.08);transition:transform 0.16s ease,box-shadow 0.16s ease;will-change:transform}
+.client-card:hover{transform:translateY(-5px);box-shadow:0 14px 24px rgba(0,0,0,0.16),0 5px 10px rgba(0,0,0,0.10)}
+.theme-dark .client-card{box-shadow:0 2px 6px rgba(0,0,0,0.35),0 1px 2px rgba(0,0,0,0.3)}
+.theme-dark .client-card:hover{box-shadow:0 16px 28px rgba(0,0,0,0.55),0 5px 12px rgba(0,0,0,0.45)}
 .otop{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:8px}
 .oid{font-weight:700;font-size:1.05em;color:var(--gold);line-height:1.3}
 .oname{font-size:0.9em;color:var(--text-main);margin-top:3px;font-weight:500}
@@ -161,11 +171,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-@media(min-width:700px){
-  .client-grid{grid-template-columns:repeat(1,1fr) !important}
+.client-grid{display:flex;flex-direction:column;gap:8px}
+.dash-order-card{cursor:pointer}
+.client-cards-col{column-gap:14px}
+.client-card{break-inside:avoid;-webkit-column-break-inside:avoid}
+@media(min-width:900px){
+  .client-cards-col{column-count:3}
 }
-@media(max-width:699px){
-  .client-grid{grid-template-columns:repeat(1,1fr) !important}
+@media(max-width:899px) and (min-width:600px){
+  .client-cards-col{column-count:2}
+}
+@media(max-width:599px){
+  .client-cards-col{column-count:1}
 }
 
 @media(max-width:600px){
@@ -319,10 +336,12 @@ function nowParts(){
 }
 function nowCardHTML(){
   const p=nowParts();
-  return `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);margin:12px 16px 4px;padding:14px 18px;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap">
-    <span style="font-size:clamp(1.2em,4.5vw,2em);font-weight:700;color:var(--text-main)">${p.date}</span>
-    <span style="font-size:clamp(1em,3.8vw,1.6em);font-weight:700;color:var(--gold)">${p.dow}</span>
-    <span style="font-size:clamp(1em,3.8vw,1.6em);font-weight:700;color:var(--text-main)">${p.time}</span>
+  return `<div class="app-width">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:14px 18px;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap">
+      <span style="font-size:clamp(1.2em,4.5vw,2em);font-weight:700;color:var(--text-main)">${p.date}</span>
+      <span style="font-size:clamp(1em,3.8vw,1.6em);font-weight:700;color:var(--gold)">${p.dow}</span>
+      <span style="font-size:clamp(1em,3.8vw,1.6em);font-weight:700;color:var(--text-main)">${p.time}</span>
+    </div>
   </div>`;
 }
 function hdr(){
@@ -653,7 +672,8 @@ function renderDash(){
   const el=document.getElementById("v-main"),oList=Object.values(orders),total=oList.length;
   const done=oList.filter(o=>gSt(o)==="done").length,delay=oList.filter(o=>gSt(o)==="delay").length,ongoing=oList.filter(o=>gSt(o)==="ongoing").length;
   const near=oList.filter(o=>{const d=dl(o.due);return d===0&&gSt(o)!=="done";});
-  const CLIENT_BG=["#E3EEFA","#E5F3E0","#FBE4E4","#EDE9F8","#FFF6E5","#E0F4F4","#FAF1DD","#FCEAD8","#E6F5E9","#F3E8F5"];
+  const CLIENT_GRAD=[["#4F8EF7","#1B4FCC"],["#3ECF6E","#1E9E45"],["#FF6B6B","#E13333"],["#9D6FF7","#6D3FD1"],["#FFC24B","#F08C00"],["#2FCFC0","#0D8C7E"],["#FFA24D","#E8641A"],["#2BD189","#0B8F63"],["#F866B0","#D4267A"],["#7B7EF7","#4338CA"]];
+  const CLIENT_GRAD_DARK=[["#3A6FD6","#16336E"],["#2CA84F","#145C2A"],["#D94545","#7A1E1E"],["#7A50D6","#3F2680"],["#E0A020","#8A5A00"],["#1FA79A","#0A4E47"],["#E07A2A","#8A3E0E"],["#1FA870","#0C5A3B"],["#D6559A","#7A1650"],["#5C5FCF","#282A7A"]];
   const CLIENT_BC=["#1A5FA8","#2E7D32","#C62828","#5E4FA8","#C8941E","#1B8A8A","#9C7A1E","#C0682E","#3D8B5A","#8A4FA8"];
   const CLIENT_BC_DARK=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5FD0D0","#D9B85C","#E8915C","#7FCB9E","#C9A8F5"];
   const CLIENT_BG_DARK=["#1c2733","#1c2a1c","#2e1c1c","#241c2e","#2c2418","#1a2b2b","#2a2618","#2c2018","#1c2820","#26202e"];
@@ -680,9 +700,15 @@ function renderDash(){
     const isDark=document.body.classList.contains("theme-dark");
     const tint="var(--bg-page)";
     const border=st==="delay"?(isDark?"#FF8A80":"#C62828"):st==="done"?(isDark?"#3B6D11":"#9CCB8A"):`${bc}${isDark?"55":"66"}`;
-    return`<div style="background:${tint};border-radius:10px;padding:10px 10px;border:1px solid ${border};cursor:pointer" onclick="openDetail('${o.id}')">
+    const curIdx=o.steps?o.steps.findIndex(s=>s===1):-1;
+    const curLabel=curIdx>=0?`${STEPS[curIdx]}중`:(o.steps&&o.steps.every(s=>s===2)?"완료":"미착수");
+    const curNote=curIdx>=0?noteText(o.notes&&o.notes[curIdx]):null;
+    return`<div class="dash-order-card" style="background:${tint};border-radius:10px;padding:10px 10px;border:1px solid ${border}" onclick="openDetail('${o.id}')">
       <div style="font-size:0.95em;color:var(--text-main);margin-bottom:8px;line-height:1.3">${o.name}</div>
-      ${o.outsource?`<div style="display:flex;justify-content:center;align-items:center;height:28px;margin-bottom:8px"><span style="font-size:0.82em;font-weight:700;color:var(--purple);background:var(--purple-bg);padding:4px 18px;border-radius:8px">외주</span></div>`:`<div class="pbar" style="margin-bottom:8px;gap:1px">${STEPS.map((s,i)=>{const c2=o.steps&&o.steps[i]===2?"ps-d":o.steps&&o.steps[i]===1?(i===FREE_STEP?"ps-free":"ps-a"):"ps-p";const nt=noteText(o.notes&&o.notes[i]);return`<div class="ps ${c2}" title="${s}${nt?" — 📝 "+nt:""}" style="position:relative">${s}${nt?'<span style="position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:var(--gold)"></span>':""}</div>`;}).join("")}</div>`}
+      ${o.outsource?`<div style="display:flex;justify-content:center;align-items:center;height:28px;margin-bottom:8px"><span style="font-size:0.82em;font-weight:700;color:var(--purple);background:var(--purple-bg);padding:4px 18px;border-radius:8px">외주</span></div>`:(()=>{
+        const badgeStyle=st==="delay"?`background:var(--red-bg);color:var(--red);border:1px solid ${isDark?"#7A1E1E":"#E8A8A8"}`:st==="done"?`background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)`:curIdx===FREE_STEP?`background:var(--gold-bg);color:var(--gold-dark);border:1px solid var(--gold-border)`:`background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)`;
+        return `<div style="display:flex;justify-content:center;margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:center;width:50%;height:28px;border-radius:6px;font-size:0.85em;font-weight:700;gap:5px;box-sizing:border-box;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${badgeStyle}">${curLabel}${curNote?'<span style="font-size:0.95em">📝</span>':""}</div></div>`;
+      })()}
       <div style="display:flex;justify-content:flex-end;align-items:center">
         ${shipped?`<span style="font-size:0.78em;color:var(--green)">${shipDate} 납품완료</span>`:`<span style="font-size:0.78em;color:${dueColor(d)}">납기 ${o.due} <span style="font-weight:700">${ddayText(d)}</span></span>`}
       </div>
@@ -692,15 +718,15 @@ function renderDash(){
   const clientSection=(clientMap,opacity)=>{
     const keys=Object.keys(clientMap);
     if(keys.length===0)return'<div class="empty">등록된 수주가 없습니다</div>';
-    return keys.map((c,ci)=>{
+    return `<div class="client-cards-col">${keys.map((c,ci)=>{
       const bc=isDark?CLIENT_BC_DARK[ci%CLIENT_BC_DARK.length]:CLIENT_BC[ci%CLIENT_BC.length];
-      const bg=isDark?`${bc}33`:CLIENT_BG[ci%CLIENT_BG.length];
+      const g=isDark?CLIENT_GRAD_DARK[ci%CLIENT_GRAD_DARK.length]:CLIENT_GRAD[ci%CLIENT_GRAD.length];
       const items=clientMap[c];
-      return`<div style="background:${bg};border:1px solid ${bc}${isDark?"33":"44"};border-radius:14px;padding:14px 16px;margin-bottom:14px;opacity:${opacity}">
-        <div style="font-size:1.1em;color:${bc};margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid ${bc}33">${c} <span style="font-size:0.75em;color:var(--text-mute);margin-left:6px">${items.length}건</span></div>
-        <div class="client-grid" style="display:grid;gap:8px">${items.map(o=>orderCard(o,bc)).join("")}</div>
+      return`<div class="client-card" style="background:linear-gradient(135deg,${g[0]},${g[1]});border:1px solid rgba(255,255,255,0.25);border-radius:14px;padding:14px 16px;margin-bottom:14px;opacity:${opacity}">
+        <div style="font-size:1.1em;color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,0.25);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.3)">${c} <span style="font-size:0.75em;color:rgba(255,255,255,0.85);margin-left:6px;font-weight:400">${items.length}건</span></div>
+        <div class="client-grid">${items.map(o=>orderCard(o,bc)).join("")}</div>
       </div>`;
-    }).join("");
+    }).join("")}</div>`;
   };
 
   el.innerHTML=`
@@ -716,7 +742,7 @@ function renderDash(){
     <div style="display:flex;gap:6px;align-items:center">
       <div style="display:flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden">
         <button class="btn" style="border:none;border-radius:0;padding:6px 12px;font-size:0.82em;background:${dashView==="list"?"var(--gold)":"transparent"};color:${dashView==="list"?"#1a1200":"var(--text-main)"}" onclick="setDashView('list')">목록</button>
-        <button class="btn" style="border:none;border-radius:0;padding:6px 12px;font-size:0.82em;background:${dashView==="calendar"?"var(--gold)":"transparent"};color:${dashView==="calendar"?"#1a1200":"var(--text-main)"}" onclick="setDashView('calendar')">📅 달력</button>
+        <button class="btn" style="border:none;border-radius:0;padding:6px 12px;font-size:0.82em;background:${dashView==="calendar"?"var(--gold)":"transparent"};color:${dashView==="calendar"?"#1a1200":"var(--text-main)"}" onclick="setDashView('calendar')">달력</button>
       </div>
       ${(isAdmin()||canRegister())?`<button class="btn gold" onclick="openAdd()">+ 수주 등록</button>`:""}
     </div>
