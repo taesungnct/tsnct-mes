@@ -180,7 +180,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .client-grid{display:flex;flex-direction:column;gap:8px}
-.dash-order-card{cursor:pointer}
 .client-cards-col{display:grid;grid-template-columns:repeat(1,1fr);gap:14px;align-items:start}
 .client-card{margin-bottom:0 !important}
 @media(min-width:900px){
@@ -705,7 +704,6 @@ function renderDash(){
   const CLIENT_GRAD_DARK=[["#3A6FD6","#16336E"],["#2CA84F","#145C2A"],["#D94545","#7A1E1E"],["#7A50D6","#3F2680"],["#E0A020","#8A5A00"],["#1FA79A","#0A4E47"],["#E07A2A","#8A3E0E"],["#1FA870","#0C5A3B"],["#D6559A","#7A1650"],["#5C5FCF","#282A7A"]];
   const CLIENT_BC=["#1A5FA8","#2E7D32","#C62828","#5E4FA8","#C8941E","#1B8A8A","#9C7A1E","#C0682E","#3D8B5A","#8A4FA8"];
   const CLIENT_BC_DARK=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5FD0D0","#D9B85C","#E8915C","#7FCB9E","#C9A8F5"];
-  const CLIENT_BG_DARK=["#1c2733","#1c2a1c","#2e1c1c","#241c2e","#2c2418","#1a2b2b","#2a2618","#2c2018","#1c2820","#26202e"];
   const isDark=document.body.classList.contains("theme-dark");
 
   const ongoingList=oList.filter(o=>gSt(o)!=="done"&&!o.outsource);
