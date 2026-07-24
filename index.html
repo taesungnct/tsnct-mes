@@ -941,6 +941,7 @@ function renderPL(o){
     </div>
     <div class="pa">
       ${sv===2?`<span style="font-size:0.88em;color:var(--green);font-weight:400">완료</span>`:sv===1?`<span style="font-size:0.88em;color:var(--blue);font-weight:400">진행중</span>`:`<span style="font-size:0.88em;color:var(--text-faint)">대기</span>`}
+      ${adminOnly&&sv>0?`<button class="btn" style="padding:8px 10px;font-size:0.88em" onclick="rev('${o.id}',${i})" title="전단계로 되돌리기">◀ 이전</button>`:""}
       ${adminOnly&&sv===1?`<button class="btn pri" style="padding:8px 13px;font-size:0.88em" onclick="adv('${o.id}',${i})">완료</button>`:""}
       ${!noteTxt||canEdit?`<button class="btn" style="padding:7px 10px" onclick="togN('${o.id}',${i})">✏</button>`:""}
     </div>
@@ -949,6 +950,17 @@ function renderPL(o){
 
 
 window.adv=(id,i)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const u={...o,steps:[...(o.steps||STEPS.map(()=>0))],history:[...(o.history||[])],completedWorkers:{...(o.completedWorkers||{})}};if(u.steps[i]===0){const p=u.steps.findIndex(s=>s===1);if(p>=0&&p!==i)return;u.steps[i]=1;u.history.push({t:td(),msg:`${STEPS[i]} 시작 (관리자)`});}else if(u.steps[i]===1){u.steps[i]=2;u.completedWorkers[i]=(o.workers&&o.workers[i])||"미지정";u.history.push({t:td(),msg:`${STEPS[i]} 완료 (관리자)`});if(o.outsource&&i===0){for(let k=1;k<6;k++)u.steps[k]=0;if(u.steps[6]!==2){u.steps[6]=1;u.history.push({t:td(),msg:"출하 시작"});}}else{const next=i+1;if(next<STEPS.length&&u.steps[next]!==2){u.steps[next]=1;u.history.push({t:td(),msg:`${STEPS[next]} 시작`});}}}saveOrder(key,u);}
+window.rev=(id,i)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const u={...o,steps:[...(o.steps||STEPS.map(()=>0))],history:[...(o.history||[])],completedWorkers:{...(o.completedWorkers||{})}};
+  if(u.steps[i]===2){
+    u.steps[i]=1;delete u.completedWorkers[i];u.history.push({t:td(),msg:`${STEPS[i]} 완료 취소 (관리자)`});
+    if(o.outsource&&i===0){if(u.steps[6]===1){u.steps[6]=0;u.history.push({t:td(),msg:"출하 시작 취소 (관리자)"});}}
+    else{const next=i+1;if(next<STEPS.length&&u.steps[next]===1){u.steps[next]=0;u.history.push({t:td(),msg:`${STEPS[next]} 시작 취소 (관리자)`});}}
+  }else if(u.steps[i]===1){
+    u.steps[i]=0;u.history.push({t:td(),msg:`${STEPS[i]} 시작 취소 (관리자)`});
+    if(o.outsource&&i===6){if(u.steps[0]===2){u.steps[0]=1;delete u.completedWorkers[0];u.history.push({t:td(),msg:"도면작업 완료 취소 (관리자)"});}}
+    else if(i>0){const prev=i-1;if(u.steps[prev]===2){u.steps[prev]=1;delete u.completedWorkers[prev];u.history.push({t:td(),msg:`${STEPS[prev]} 완료 취소 (관리자)`});}}
+  }else{return;}
+  saveOrder(key,u);}
 window.setWk=(id,i,v)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const u={...o,workers:[...(o.workers||STEPS.map(()=>"미지정"))]};u.workers[i]=v;saveOrder(key,u);}
 window.saveN=(id,i,v)=>{const key=getOrderKey(id);const o=orders[key];if(!o)return;const notes=[...(o.notes||STEPS.map(()=>""))];const prev=notes[i];const prevAuthor=prev&&typeof prev==="object"?prev.author:null;notes[i]=v?{text:v,author:prevAuthor||wOrAdminName()}:"";saveOrder(key,{...o,notes});}
 function wOrAdminName(){return isAdmin()?"관리자":wName();}
