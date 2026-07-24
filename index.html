@@ -180,7 +180,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 @keyframes spin{to{transform:rotate(360deg)}}
 
 @keyframes redDotBlink{0%,100%{opacity:1}50%{opacity:0.25}}
-.near-dot{position:absolute;top:9px;right:9px;width:10px;height:10px;border-radius:50%;background:#FF3B30;box-shadow:0 0 0 2px rgba(255,255,255,0.5);animation:redDotBlink 1.4s ease-in-out infinite}
+.near-dot{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,0.6);animation:redDotBlink 1.4s ease-in-out infinite}
 .client-grid{display:flex;flex-direction:column;gap:8px}
 .client-cards-col{position:relative}
 .client-card{margin-bottom:14px;transition:top 0.15s ease,left 0.15s ease}
@@ -826,12 +826,14 @@ function renderDash(){
         const {grad:g}=clientColors(c,usedColors2);
         const items=nearMap[c];
         return `<div class="client-card" style="position:relative;background:linear-gradient(135deg,${g[0]},${g[1]});border:none;border-radius:14px;padding:14px 16px;margin-bottom:14px">
-          <span class="near-dot"></span>
           <div style="font-size:1.1em;color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,0.25);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.3)">${c} <span style="font-size:0.75em;color:rgba(255,255,255,0.85);margin-left:6px;font-weight:400">${items.length}건</span></div>
-          <div class="client-grid">${items.map(o=>`<div class="dash-order-card" style="background:var(--bg-page);border:1px solid var(--border);border-radius:10px;padding:10px 10px;cursor:pointer" onclick="openDetail('${o.id}')">
+          <div class="client-grid">${items.map(o=>{
+            const od=dl(o.due);
+            return `<div class="dash-order-card" style="position:relative;background:var(--bg-page);border:1px solid var(--border);border-radius:10px;padding:10px 10px;cursor:pointer" onclick="openDetail('${o.id}')">
+            <span class="near-dot" style="background:${od<0?"#FF3B30":"#34C759"}"></span>
             <div style="font-size:0.9em;color:var(--text-main);margin-bottom:4px;line-height:1.3">${o.name}</div>
             <div style="font-size:0.78em;color:var(--text-mute)">납기 ${o.due}</div>
-          </div>`).join("")}</div>
+          </div>`;}).join("")}</div>
         </div>`;
       }).join("")}</div>`;
     })()}
