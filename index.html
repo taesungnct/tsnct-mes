@@ -179,9 +179,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+@keyframes redDotBlink{0%,100%{opacity:1}50%{opacity:0.25}}
+.near-dot{position:absolute;top:9px;right:9px;width:10px;height:10px;border-radius:50%;background:#FF3B30;box-shadow:0 0 0 2px rgba(255,255,255,0.5);animation:redDotBlink 1.4s ease-in-out infinite}
 .client-grid{display:flex;flex-direction:column;gap:8px}
 .client-cards-col{position:relative}
 .client-card{margin-bottom:14px;transition:top 0.15s ease,left 0.15s ease}
+@media(max-width:599px){
+  .dash-cols-sel{display:none}
+}
 
 @media(max-width:600px){
   .header{padding:8px 12px;gap:6px}
@@ -245,6 +250,16 @@ const STEP_COLORS_DARK=[
   {bg:"#2C7A3A",text:"#fff",border:"#1F5A2A"}
 ];
 const FREE_STEP=4;
+const CLIENT_BC=["#1A5FA8","#2E7D32","#C62828","#5E4FA8","#C8941E","#1B8A8A","#9C7A1E","#C0682E","#3D8B5A","#8A4FA8"];
+const CLIENT_BC_DARK=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5FD0D0","#D9B85C","#E8915C","#7FCB9E","#C9A8F5"];
+const CLIENT_GRAD=[["#4F8EF7","#1B4FCC"],["#3ECF6E","#1E9E45"],["#FF6B6B","#E13333"],["#9D6FF7","#6D3FD1"],["#FFC24B","#F08C00"],["#2FCFC0","#0D8C7E"],["#FFA24D","#E8641A"],["#2BD189","#0B8F63"],["#F866B0","#D4267A"],["#7B7EF7","#4338CA"]];
+const CLIENT_GRAD_DARK=[["#3A6FD6","#16336E"],["#2CA84F","#145C2A"],["#D94545","#7A1E1E"],["#7A50D6","#3F2680"],["#E0A020","#8A5A00"],["#1FA79A","#0A4E47"],["#E07A2A","#8A3E0E"],["#1FA870","#0C5A3B"],["#D6559A","#7A1650"],["#5C5FCF","#282A7A"]];
+function clientColors(name){
+  const isDark=document.body.classList.contains("theme-dark");
+  let h=0;const s=name||"";for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;
+  const idx=h%10;
+  return {bc:(isDark?CLIENT_BC_DARK:CLIENT_BC)[idx],grad:(isDark?CLIENT_GRAD_DARK:CLIENT_GRAD)[idx]};
+}
 const DEF_USERS={
   admin:{id:"admin",pw:"1234",name:"관리자",role:"admin",stepIdx:-1},
   w1:{id:"w1",name:"김오기",role:"worker",pin:"1234",stepIdx:0,canRegister:true},
@@ -602,17 +617,22 @@ function renderWorker(){
   ${freeActive.length?`<div class="free-zone"><div class="free-zone-title">🔧 후가공 대기 (${freeActive.length}건)</div>${freeActive.map(o=>wCard(o,FREE_STEP,"free")).join("")}</div>`:""}
   ${myDone.length?`<div class="sh" style="margin-top:0.75rem"><div class="sh-title" style="color:var(--text-faint);font-size:0.9em">완료 (${myDone.length}건)</div></div>${myDone.map(o=>`<div class="ocard" style="cursor:default;opacity:0.45"><div class="otop"><div><div class="oname">${o.name}</div></div><span class="badge b-done">완료</span></div></div>`).join("")}`:""}`;}
 
-function wCard(o,si,type){return`<div class="work-card" style="border-color:${type==="free"?"#E0A93A":"#9CCB8A"}">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px">
-    <div>
-      <div style="font-size:0.9em;color:var(--text-sub);margin-top:3px">${o.name} · ${o.client} · ${o.qty}개</div>
-      <div style="font-size:0.82em;color:var(--text-mute);margin-top:3px">납기 ${o.due} <span style="font-weight:700;color:${dueColor(dl(o.due))}">${ddayText(dl(o.due))}</span></div>
+function wCard(o,si,type){
+  const {grad:g}=clientColors(o.client);
+  const d=dl(o.due);
+  const nt=o.notes&&noteText(o.notes[si]);
+  return `<div class="client-card" style="background:linear-gradient(135deg,${g[0]},${g[1]});border:1px solid rgba(255,255,255,0.25);border-radius:14px;padding:14px 16px;margin-bottom:12px">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;gap:8px">
+    <div style="min-width:0">
+      <div style="font-size:1.05em;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.25)">${o.client}</div>
+      <div style="font-size:0.88em;color:rgba(255,255,255,0.92);margin-top:3px">${o.name}</div>
+      <div style="font-size:0.8em;color:rgba(255,255,255,0.8);margin-top:3px">납기 ${o.due} <span style="font-weight:700">${ddayText(d)}</span></div>
     </div>
-    ${dueBadge(dl(o.due))}
+    <div style="flex-shrink:0;white-space:nowrap">${dueBadge(d)}</div>
   </div>
-  ${o.notes&&o.notes[si]?`<div style="font-size:0.85em;color:var(--text-mute);margin-bottom:11px;padding:8px 11px;background:var(--bg-soft);border-radius:8px">📝 ${o.notes[si]}</div>`:""}
+  ${nt?`<div style="font-size:0.85em;color:#fff;margin-bottom:11px;padding:8px 11px;background:rgba(255,255,255,0.18);border-radius:8px">📝 ${nt}</div>`:""}
   <div style="display:flex;gap:8px">
-    ${si>0?`<button class="btn" style="flex:0 0 auto;padding:18px 16px;font-size:0.95em;border-radius:14px" onclick="wSendBack('${o.id}',${si})" title="${STEPS[si-1]}로 돌려보내기">↩ 이전 공정으로</button>`:""}
+    ${si>0?`<button class="btn" style="flex:0 0 auto;padding:14px 14px;font-size:0.88em;border-radius:12px;background:rgba(255,255,255,0.9);color:#222;border:none" onclick="wSendBack('${o.id}',${si})" title="${STEPS[si-1]}로 돌려보내기">↩ 이전 공정으로</button>`:""}
     <button class="btn ${type==="free"?"gold":"grn"} big" onclick="wComplete('${o.id}',${si})">✓ ${STEPS[si]} 완료 처리</button>
   </div>
 </div>`;}
@@ -686,25 +706,28 @@ function renderCalendar(oList){
   `;
 }
 
+let dashCols=0;
+window.setDashCols=(v)=>{dashCols=parseInt(v)||0;layoutMasonry();}
 function masonryCols(){
+  if(dashCols>0)return dashCols;
   const w=window.innerWidth;
-  if(w>=1400)return 4;
-  if(w>=900)return 3;
-  if(w>=600)return 2;
-  return 1;
+  return w>=1400?4:w>=900?3:w>=600?2:1;
 }
 function layoutMasonry(){
   document.querySelectorAll(".client-cards-col").forEach(container=>{
     const cards=Array.from(container.children);
     if(!cards.length)return;
-    const cols=masonryCols();
+    const gap=14;
+    const cw=container.clientWidth;
+    const minCardW=160;
+    const maxFit=Math.max(1,Math.floor((cw+gap)/(minCardW+gap)));
+    const fixed=container.dataset.fixedCols?parseInt(container.dataset.fixedCols,10):0;
+    const cols=Math.min(fixed>0?fixed:masonryCols(),maxFit);
     if(cols<=1){
       container.style.height="";
       cards.forEach(card=>{card.style.position="";card.style.width="";card.style.left="";card.style.top="";});
       return;
     }
-    const gap=14;
-    const cw=container.clientWidth;
     const cardW=(cw-gap*(cols-1))/cols;
     const colH=new Array(cols).fill(0);
     cards.forEach(card=>{
@@ -727,11 +750,7 @@ window.addEventListener("resize",()=>{
 function renderDash(){
   const el=document.getElementById("v-main"),oList=Object.values(orders),total=oList.length;
   const done=oList.filter(o=>gSt(o)==="done").length,delay=oList.filter(o=>gSt(o)==="delay").length,ongoing=oList.filter(o=>gSt(o)==="ongoing").length;
-  const near=oList.filter(o=>{const d=dl(o.due);return d===0&&gSt(o)!=="done";});
-  const CLIENT_GRAD=[["#4F8EF7","#1B4FCC"],["#3ECF6E","#1E9E45"],["#FF6B6B","#E13333"],["#9D6FF7","#6D3FD1"],["#FFC24B","#F08C00"],["#2FCFC0","#0D8C7E"],["#FFA24D","#E8641A"],["#2BD189","#0B8F63"],["#F866B0","#D4267A"],["#7B7EF7","#4338CA"]];
-  const CLIENT_GRAD_DARK=[["#3A6FD6","#16336E"],["#2CA84F","#145C2A"],["#D94545","#7A1E1E"],["#7A50D6","#3F2680"],["#E0A020","#8A5A00"],["#1FA79A","#0A4E47"],["#E07A2A","#8A3E0E"],["#1FA870","#0C5A3B"],["#D6559A","#7A1650"],["#5C5FCF","#282A7A"]];
-  const CLIENT_BC=["#1A5FA8","#2E7D32","#C62828","#5E4FA8","#C8941E","#1B8A8A","#9C7A1E","#C0682E","#3D8B5A","#8A4FA8"];
-  const CLIENT_BC_DARK=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5FD0D0","#D9B85C","#E8915C","#7FCB9E","#C9A8F5"];
+  const near=oList.filter(o=>{const d=dl(o.due);return d<=0&&gSt(o)!=="done";});
   const isDark=document.body.classList.contains("theme-dark");
 
   const ongoingList=oList.filter(o=>gSt(o)!=="done"&&!o.outsource);
@@ -774,9 +793,8 @@ function renderDash(){
   const clientSection=(clientMap,opacity)=>{
     const keys=Object.keys(clientMap);
     if(keys.length===0)return'<div class="empty">등록된 수주가 없습니다</div>';
-    return `<div class="client-cards-col">${keys.map((c,ci)=>{
-      const bc=isDark?CLIENT_BC_DARK[ci%CLIENT_BC_DARK.length]:CLIENT_BC[ci%CLIENT_BC.length];
-      const g=isDark?CLIENT_GRAD_DARK[ci%CLIENT_GRAD_DARK.length]:CLIENT_GRAD[ci%CLIENT_GRAD.length];
+    return `<div class="client-cards-col">${keys.map((c)=>{
+      const {bc,grad:g}=clientColors(c);
       const items=clientMap[c];
       return`<div class="client-card" style="background:linear-gradient(135deg,${g[0]},${g[1]});border:1px solid rgba(255,255,255,0.25);border-radius:14px;padding:14px 16px;margin-bottom:14px;opacity:${opacity}">
         <div style="font-size:1.1em;color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,0.25);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.3)">${c} <span style="font-size:0.75em;color:rgba(255,255,255,0.85);margin-left:6px;font-weight:400">${items.length}건</span></div>
@@ -792,10 +810,36 @@ function renderDash(){
     <div class="scard"><div class="slabel">완료</div><div class="sval green">${done}</div></div>
     <div class="scard"><div class="slabel">지연</div><div class="sval red">${delay}</div></div>
   </div>
-  ${near.length?`<div class="alert-bar" style="cursor:pointer;flex-direction:column;align-items:flex-start;gap:6px" onclick="showNearModal()"><div>🔔 오늘 납기 — 탭하여 확인</div>${near.map(o=>`<div style="font-size:0.9em;padding-left:4px">· <strong>${o.client}</strong> / ${o.name} <span style="color:var(--text-mute);font-size:0.85em">${o.due}</span></div>`).join("")}</div>`:""}
+  ${near.length?`<div style="background:var(--bg-card);border:1px solid var(--gold);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:14px">
+    <div style="font-size:1.05em;font-weight:600;color:var(--text-main);margin-bottom:12px">🔔 오늘 납기</div>
+    ${(()=>{
+      const nearMap={};
+      near.forEach(o=>{if(!nearMap[o.client])nearMap[o.client]=[];nearMap[o.client].push(o);});
+      return `<div class="client-cards-col" data-fixed-cols="5">${Object.keys(nearMap).map(c=>{
+        const {grad:g}=clientColors(c);
+        const items=nearMap[c];
+        return `<div class="client-card" style="position:relative;background:linear-gradient(135deg,${g[0]},${g[1]});border:none;border-radius:14px;padding:14px 16px;margin-bottom:14px">
+          <span class="near-dot"></span>
+          <div style="font-size:1.1em;color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,0.25);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.3)">${c} <span style="font-size:0.75em;color:rgba(255,255,255,0.85);margin-left:6px;font-weight:400">${items.length}건</span></div>
+          <div class="client-grid">${items.map(o=>`<div class="dash-order-card" style="background:var(--bg-page);border:1px solid var(--border);border-radius:10px;padding:10px 10px;cursor:pointer" onclick="openDetail('${o.id}')">
+            <div style="font-size:0.9em;color:var(--text-main);margin-bottom:4px;line-height:1.3">${o.name}</div>
+            <div style="font-size:0.78em;color:var(--text-mute)">납기 ${o.due}</div>
+          </div>`).join("")}</div>
+        </div>`;
+      }).join("")}</div>`;
+    })()}
+  </div>`:""}
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:14px">
   <div class="sh" style="margin-bottom:14px">
     <div class="sh-title">🏢 업체별 수주 현황</div>
     <div style="display:flex;gap:6px;align-items:center">
+      <div class="dash-cols-sel" style="display:flex;align-items:center;gap:5px;border:1px solid var(--border-strong);border-radius:8px;padding:4px 4px 4px 10px;background:var(--bg-card)">
+        <span style="font-size:0.78em;color:var(--text-mute);white-space:nowrap">카드정렬</span>
+        <select onchange="setDashCols(this.value)" style="border:none;border-radius:6px;padding:4px 6px;font-size:0.82em;background:var(--bg-page);color:var(--text-main)" title="한 줄에 표시할 카드 수">
+          <option value="0" ${dashCols===0?"selected":""}>자동</option>
+          ${[1,2,3,4,5].map(n=>`<option value="${n}" ${dashCols===n?"selected":""}>${n}열</option>`).join("")}
+        </select>
+      </div>
       <div style="display:flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden">
         <button class="btn" style="border:none;border-radius:0;padding:6px 12px;font-size:0.82em;background:${dashView==="list"?"var(--gold)":"transparent"};color:${dashView==="list"?"#1a1200":"var(--text-main)"}" onclick="setDashView('list')">목록</button>
         <button class="btn" style="border:none;border-radius:0;padding:6px 12px;font-size:0.82em;background:${dashView==="calendar"?"var(--gold)":"transparent"};color:${dashView==="calendar"?"#1a1200":"var(--text-main)"}" onclick="setDashView('calendar')">달력</button>
@@ -803,15 +847,16 @@ function renderDash(){
       ${(isAdmin()||canRegister())?`<button class="btn gold" onclick="openAdd()">+ 수주 등록</button>`:""}
     </div>
   </div>
-  ${dashView==="calendar"?renderCalendar(oList):`${clientSection(ongoingMap,1)}
-  ${outsourceList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title">🔧 외주 현황</div>${isAdmin()?`<button class="btn" onclick="cleanupOutsourceSteps()" style="font-size:0.82em">⟳ 공정 정리</button>`:""}</div>${clientSection(groupByClient(outsourceList),1)}`:""}
-  ${allDoneCount?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px;cursor:pointer" onclick="toggleDoneSection()"><div class="sh-title" style="color:var(--green)">📦 납품 완료 (${allDoneCount}건) <span style="font-size:0.75em">${doneCollapsed?"▸":"▾"}</span></div></div>${doneCollapsed?"":clientSection(doneMap,0.65)}`:""}`}
+  ${dashView==="calendar"?renderCalendar(oList):clientSection(ongoingMap,1)}
+  </div>
+  ${dashView==="list"?`${outsourceList.length?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px"><div class="sh-title">🔧 외주 현황</div>${isAdmin()?`<button class="btn" onclick="cleanupOutsourceSteps()" style="font-size:0.82em">⟳ 공정 정리</button>`:""}</div>${clientSection(groupByClient(outsourceList),1)}`:""}
+  ${allDoneCount?`<div class="sh" style="margin-top:1.5rem;margin-bottom:14px;cursor:pointer" onclick="toggleDoneSection()"><div class="sh-title" style="color:var(--green)">📦 납품 완료 (${allDoneCount}건) <span style="font-size:0.75em">${doneCollapsed?"▸":"▾"}</span></div></div>${doneCollapsed?"":clientSection(doneMap,0.65)}`:""}`:""}
   `;
   requestAnimationFrame(layoutMasonry);
 }
 
 window.showNearModal=()=>{
-  const near=Object.values(orders).filter(o=>{const d=dl(o.due);return d===0&&gSt(o)!=="done";});
+  const near=Object.values(orders).filter(o=>{const d=dl(o.due);return d<=0&&gSt(o)!=="done";});
   showOv(`<div class="modal">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
       <div class="mtitle" style="margin-bottom:0">🔔 오늘 납기 수주</div>
@@ -941,7 +986,7 @@ function renderPL(o){
     </div>
     <div class="pa">
       ${sv===2?`<span style="font-size:0.88em;color:var(--green);font-weight:400">완료</span>`:sv===1?`<span style="font-size:0.88em;color:var(--blue);font-weight:400">진행중</span>`:`<span style="font-size:0.88em;color:var(--text-faint)">대기</span>`}
-      ${adminOnly&&sv>0?`<button class="btn" style="padding:8px 10px;font-size:0.88em" onclick="rev('${o.id}',${i})" title="전단계로 되돌리기">◀ 이전</button>`:""}
+      ${adminOnly&&sv===1?`<button class="btn" style="padding:8px 10px;font-size:0.88em" onclick="rev('${o.id}',${i})" title="전단계로 되돌리기">◀ 이전</button>`:""}
       ${adminOnly&&sv===1?`<button class="btn pri" style="padding:8px 13px;font-size:0.88em" onclick="adv('${o.id}',${i})">완료</button>`:""}
       ${!noteTxt||canEdit?`<button class="btn" style="padding:7px 10px" onclick="togN('${o.id}',${i})">✏</button>`:""}
     </div>
