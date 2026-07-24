@@ -73,8 +73,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .sval{font-size:2em;font-weight:700}
 .sval.gold{color:var(--gold)}.sval.blue{color:var(--blue)}.sval.green{color:var(--green)}.sval.red{color:var(--red)}
 .alert-bar{background:var(--gold-bg);border:2px solid var(--gold-border);border-radius:12px;padding:13px 16px;margin-bottom:1rem;font-size:0.95em;color:var(--gold-dark);display:flex;align-items:center;gap:10px;font-weight:500;line-height:1.4}
-.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:6px}
-.sh-title{font-size:1.05em;font-weight:700;color:var(--gold-dark)}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:nowrap}
+.sh-title{font-size:1.05em;font-weight:700;color:var(--gold-dark);white-space:nowrap;flex-shrink:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .btn{padding:9px 18px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg-card);font-size:0.88em;cursor:pointer;font-family:inherit;color:var(--text-main);display:inline-flex;align-items:center;gap:6px;touch-action:manipulation;font-weight:500}
 .btn:active{opacity:0.7}
 .btn.pri{background:var(--blue);color:#fff;border-color:var(--blue)}
@@ -184,7 +184,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .client-grid{display:flex;flex-direction:column;gap:8px}
 .client-cards-col{position:relative}
 .client-card{margin-bottom:14px;transition:top 0.15s ease,left 0.15s ease}
-@media(max-width:599px){
+@media(max-width:700px){
   .dash-cols-sel{display:none}
 }
 
@@ -254,10 +254,15 @@ const CLIENT_BC=["#1A5FA8","#2E7D32","#C62828","#5E4FA8","#C8941E","#1B8A8A","#9
 const CLIENT_BC_DARK=["#7EC8E3","#6FCF6F","#FF8A80","#B0A8FF","#F5A800","#5FD0D0","#D9B85C","#E8915C","#7FCB9E","#C9A8F5"];
 const CLIENT_GRAD=[["#4F8EF7","#1B4FCC"],["#3ECF6E","#1E9E45"],["#FF6B6B","#E13333"],["#9D6FF7","#6D3FD1"],["#FFC24B","#F08C00"],["#2FCFC0","#0D8C7E"],["#FFA24D","#E8641A"],["#2BD189","#0B8F63"],["#F866B0","#D4267A"],["#7B7EF7","#4338CA"]];
 const CLIENT_GRAD_DARK=[["#3A6FD6","#16336E"],["#2CA84F","#145C2A"],["#D94545","#7A1E1E"],["#7A50D6","#3F2680"],["#E0A020","#8A5A00"],["#1FA79A","#0A4E47"],["#E07A2A","#8A3E0E"],["#1FA870","#0C5A3B"],["#D6559A","#7A1650"],["#5C5FCF","#282A7A"]];
-function clientColors(name){
+function clientColors(name,usedSet){
   const isDark=document.body.classList.contains("theme-dark");
   let h=0;const s=name||"";for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;
-  const idx=h%10;
+  let idx=h%10;
+  if(usedSet){
+    let tries=0;
+    while(usedSet.has(idx)&&tries<10){idx=(idx+1)%10;tries++;}
+    usedSet.add(idx);
+  }
   return {bc:(isDark?CLIENT_BC_DARK:CLIENT_BC)[idx],grad:(isDark?CLIENT_GRAD_DARK:CLIENT_GRAD)[idx]};
 }
 const DEF_USERS={
@@ -793,8 +798,9 @@ function renderDash(){
   const clientSection=(clientMap,opacity)=>{
     const keys=Object.keys(clientMap);
     if(keys.length===0)return'<div class="empty">등록된 수주가 없습니다</div>';
+    const usedColors=new Set();
     return `<div class="client-cards-col">${keys.map((c)=>{
-      const {bc,grad:g}=clientColors(c);
+      const {bc,grad:g}=clientColors(c,usedColors);
       const items=clientMap[c];
       return`<div class="client-card" style="background:linear-gradient(135deg,${g[0]},${g[1]});border:1px solid rgba(255,255,255,0.25);border-radius:14px;padding:14px 16px;margin-bottom:14px;opacity:${opacity}">
         <div style="font-size:1.1em;color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,0.25);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.3)">${c} <span style="font-size:0.75em;color:rgba(255,255,255,0.85);margin-left:6px;font-weight:400">${items.length}건</span></div>
@@ -815,8 +821,9 @@ function renderDash(){
     ${(()=>{
       const nearMap={};
       near.forEach(o=>{if(!nearMap[o.client])nearMap[o.client]=[];nearMap[o.client].push(o);});
+      const usedColors2=new Set();
       return `<div class="client-cards-col" data-fixed-cols="5">${Object.keys(nearMap).map(c=>{
-        const {grad:g}=clientColors(c);
+        const {grad:g}=clientColors(c,usedColors2);
         const items=nearMap[c];
         return `<div class="client-card" style="position:relative;background:linear-gradient(135deg,${g[0]},${g[1]});border:none;border-radius:14px;padding:14px 16px;margin-bottom:14px">
           <span class="near-dot"></span>
@@ -832,7 +839,7 @@ function renderDash(){
   <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:14px">
   <div class="sh" style="margin-bottom:14px">
     <div class="sh-title">🏢 업체별 수주 현황</div>
-    <div style="display:flex;gap:6px;align-items:center">
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:nowrap;flex-shrink:0">
       <div class="dash-cols-sel" style="display:flex;align-items:center;gap:5px;border:1px solid var(--border-strong);border-radius:8px;padding:4px 4px 4px 10px;background:var(--bg-card)">
         <span style="font-size:0.78em;color:var(--text-mute);white-space:nowrap">카드정렬</span>
         <select onchange="setDashCols(this.value)" style="border:none;border-radius:6px;padding:4px 6px;font-size:0.82em;background:var(--bg-page);color:var(--text-main)" title="한 줄에 표시할 카드 수">
@@ -840,11 +847,11 @@ function renderDash(){
           ${[1,2,3,4,5].map(n=>`<option value="${n}" ${dashCols===n?"selected":""}>${n}열</option>`).join("")}
         </select>
       </div>
-      <div style="display:flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden">
-        <button class="btn" style="border:none;border-radius:0;padding:6px 12px;font-size:0.82em;background:${dashView==="list"?"var(--gold)":"transparent"};color:${dashView==="list"?"#1a1200":"var(--text-main)"}" onclick="setDashView('list')">목록</button>
-        <button class="btn" style="border:none;border-radius:0;padding:6px 12px;font-size:0.82em;background:${dashView==="calendar"?"var(--gold)":"transparent"};color:${dashView==="calendar"?"#1a1200":"var(--text-main)"}" onclick="setDashView('calendar')">달력</button>
+      <div style="display:flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden;flex-shrink:0">
+        <button class="btn" style="border:none;border-radius:0;padding:6px 12px;font-size:0.82em;white-space:nowrap;background:${dashView==="list"?"var(--gold)":"transparent"};color:${dashView==="list"?"#1a1200":"var(--text-main)"}" onclick="setDashView('list')">목록</button>
+        <button class="btn" style="border:none;border-radius:0;padding:6px 12px;font-size:0.82em;white-space:nowrap;background:${dashView==="calendar"?"var(--gold)":"transparent"};color:${dashView==="calendar"?"#1a1200":"var(--text-main)"}" onclick="setDashView('calendar')">달력</button>
       </div>
-      ${(isAdmin()||canRegister())?`<button class="btn gold" onclick="openAdd()">+ 수주 등록</button>`:""}
+      ${(isAdmin()||canRegister())?`<button class="btn gold" style="flex-shrink:0;white-space:nowrap" onclick="openAdd()">+ 수주 등록</button>`:""}
     </div>
   </div>
   ${dashView==="calendar"?renderCalendar(oList):clientSection(ongoingMap,1)}
