@@ -68,7 +68,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 }
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:1.25rem}
 @media(min-width:500px){.stats{grid-template-columns:repeat(4,1fr)}}
-.scard{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+@media(max-width:600px){.cal-day-items{grid-template-columns:1fr!important}}
+.scard{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);text-align:center}
 .slabel{font-size:0.82em;color:var(--text-mute);margin-bottom:5px;font-weight:500}
 .sval{font-size:2em;font-weight:700}
 .sval.gold{color:var(--gold)}.sval.blue{color:var(--blue)}.sval.green{color:var(--green)}.sval.red{color:var(--red)}
@@ -687,7 +688,7 @@ function renderCalendar(oList){
     const wdColor=wd===0?(isDark?"#FF8A80":"#C62828"):wd===6?(isDark?"#7EC8E3":"#1A5FA8"):"var(--text-main)";
     return `<div style="min-height:110px;background:${isToday?"var(--gold-bg)":"var(--bg-card2)"};border:1px solid ${isToday?"var(--gold)":"var(--border)"};border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:3px;overflow:hidden">
       <div style="font-size:0.78em;font-weight:700;color:${wdColor}">${day}</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">
+      <div class="cal-day-items" style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">
         ${items.slice(0,9).map(o=>{
           const st=gSt(o);
           const dotColor=st==="delay"?(isDark?"#FF8A80":"#C62828"):st==="done"?(isDark?"#6FCF6F":"#2E7D32"):o.outsource?(isDark?"#B0A8FF":"#5E4FA8"):(isDark?"#7EC8E3":"#1A5FA8");
