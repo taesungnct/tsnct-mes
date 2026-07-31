@@ -665,10 +665,16 @@ function renderCalendar(oList){
   const startWeekday=firstDay.getUTCDay();
   const daysInMonth=new Date(Date.UTC(y,mo+1,0)).getUTCDate();
   const todayStr=td();
+  const calShipDate=(o)=>{
+    if(!(o.steps&&o.steps[6]===2))return null;
+    const h=o.history&&o.history.filter(x=>x.msg&&x.msg.includes("출하")&&x.msg.includes("완료")).pop();
+    return h?h.t:o.due;
+  };
   const byDate={};
   oList.forEach(o=>{
     if(!o.due)return;
-    const d=o.due;
+    const shipDate=calShipDate(o);
+    const d=shipDate||o.due;
     if(!byDate[d])byDate[d]=[];
     byDate[d].push(o);
   });
@@ -691,7 +697,9 @@ function renderCalendar(oList){
       <div class="cal-day-items" style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">
         ${items.slice(0,9).map(o=>{
           const st=gSt(o);
-          const dotColor=st==="delay"?(isDark?"#FF8A80":"#C62828"):st==="done"?(isDark?"#6FCF6F":"#2E7D32"):o.outsource?(isDark?"#B0A8FF":"#5E4FA8"):(isDark?"#7EC8E3":"#1A5FA8");
+          const shipDate=calShipDate(o);
+          const doneColor=!shipDate||shipDate===o.due?(isDark?"#6FCF6F":"#2E7D32"):shipDate>o.due?(isDark?"#FF8A80":"#C62828"):(isDark?"#F5C542":"#E0A000");
+          const dotColor=st==="done"?doneColor:st==="delay"?(isDark?"#FF8A80":"#C62828"):o.outsource?(isDark?"#B0A8FF":"#5E4FA8"):(isDark?"#7EC8E3":"#1A5FA8");
           return `<div onclick="openDetail('${o.id}')" style="cursor:pointer;font-size:0.62em;background:${dotColor}22;color:${dotColor};border-radius:3px;padding:2px 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center" title="${o.client} / ${o.name}">${o.client}</div>`;
         }).join("")}
       </div>
