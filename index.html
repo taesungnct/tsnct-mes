@@ -680,19 +680,23 @@ function renderCalendar(oList){
   });
   const monthLabel=`${y}년 ${mo+1}월`;
   const weekNames=["일","월","화","수","목","금","토"];
+  const prevY=mo===0?y-1:y,prevMo=mo===0?11:mo-1;
+  const daysInPrevMonth=new Date(Date.UTC(prevY,prevMo+1,0)).getUTCDate();
+  const nextY=mo===11?y+1:y,nextMo=mo===11?0:mo+1;
   const cells=[];
-  for(let i=0;i<startWeekday;i++)cells.push(null);
-  for(let day=1;day<=daysInMonth;day++)cells.push(day);
-  while(cells.length%7!==0)cells.push(null);
+  for(let i=0;i<startWeekday;i++)cells.push({day:daysInPrevMonth-startWeekday+1+i,y:prevY,mo:prevMo,other:true});
+  for(let day=1;day<=daysInMonth;day++)cells.push({day,y,mo,other:false});
+  let nextDay=1;
+  while(cells.length%7!==0)cells.push({day:nextDay++,y:nextY,mo:nextMo,other:true});
   const rows=[];
   for(let i=0;i<cells.length;i+=7)rows.push(cells.slice(i,i+7));
-  const cellHtml=(day,wd)=>{
-    if(day===null)return `<div style="min-height:110px;background:var(--bg-page);border-radius:8px"></div>`;
-    const dateStr=`${y}-${String(mo+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+  const cellHtml=(cell,wd)=>{
+    const {day,y:cy,mo:cmo,other}=cell;
+    const dateStr=`${cy}-${String(cmo+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
     const isToday=dateStr===todayStr;
     const items=byDate[dateStr]||[];
     const wdColor=wd===0?(isDark?"#FF8A80":"#C62828"):wd===6?(isDark?"#7EC8E3":"#1A5FA8"):"var(--text-main)";
-    return `<div style="min-height:110px;background:${isToday?"var(--gold-bg)":"var(--bg-card2)"};border:1px solid ${isToday?"var(--gold)":"var(--border)"};border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:3px;overflow:hidden">
+    return `<div style="min-height:110px;background:${isToday?"var(--gold-bg)":other?"var(--bg-page)":"var(--bg-card2)"};border:1px solid ${isToday?"var(--gold)":"var(--border)"};border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:3px;overflow:hidden;opacity:${other?0.55:1}">
       <div style="font-size:0.78em;font-weight:700;color:${wdColor}">${day}</div>
       <div class="cal-day-items" style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">
         ${items.slice(0,9).map(o=>{
@@ -716,7 +720,7 @@ function renderCalendar(oList){
   <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px">
     ${weekNames.map((w,i)=>`<div style="text-align:center;font-size:0.78em;color:${i===0?(isDark?"#FF8A80":"#C62828"):i===6?(isDark?"#7EC8E3":"#1A5FA8"):"var(--text-mute)"};padding:4px 0">${w}</div>`).join("")}
   </div>
-  ${rows.map(row=>`<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px">${row.map((day,i)=>cellHtml(day,i)).join("")}</div>`).join("")}
+  ${rows.map(row=>`<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px">${row.map((cell,i)=>cellHtml(cell,i)).join("")}</div>`).join("")}
   `;
 }
 
