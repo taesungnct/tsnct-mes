@@ -756,7 +756,7 @@ window.addEventListener("resize",()=>{
 function renderDash(){
   const el=document.getElementById("v-main"),oList=Object.values(orders),total=oList.length;
   const done=oList.filter(o=>gSt(o)==="done").length,delay=oList.filter(o=>gSt(o)==="delay").length,ongoing=oList.filter(o=>gSt(o)==="ongoing").length;
-  const near=oList.filter(o=>{const d=dl(o.due);return d<=0&&gSt(o)!=="done";});
+  const near=oList.filter(o=>{const d=dl(o.due);const shipping=o.steps&&o.steps[6]===1;return gSt(o)!=="done"&&(d<=0||shipping);});
   const isDark=document.body.classList.contains("theme-dark");
 
   const ongoingList=oList.filter(o=>gSt(o)!=="done"&&!o.outsource);
